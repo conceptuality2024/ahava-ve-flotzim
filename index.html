@@ -274,8 +274,10 @@ const REL=[
   {k:'cat',l:'חתול',e:'🐱'},{k:'catF',l:'חתולה',e:'🐈'},
   {k:'custom',l:'אחר',e:'✨'}
 ];
-const GENDERS=['זכר','נקבה','אחר'];
-const EMOJIS=['😎','🤪','🥳','🦄','🐸','🐷','🦖','👑','🧸','🐰','🦊','🐼'];
+const GENDERS=['זכר','נקבה','אחר','גם וגם'];
+/* the first emojis suggested depend on the chosen gender, then everyone gets the same list */
+const EMOJI_BY_GENDER={'זכר':['🧔','👨','👴','👦','🧑‍🦱'],'נקבה':['👩','👧','👱‍♀️','👵','🧕'],'אחר':['🧑','🧒','🧑‍🦳'],'גם וגם':['👫','🧑‍🤝‍🧑','🌈','💞']};
+const EMOJIS_MORE=['🐶','🐕','🐱','🐈','🐸','🐷','🐰','🦊','🐼','🦖','🦄','🐻','🐨','🦁','🐵','🐙','😎','🤪','🥳','👑','🧸','🎈','🔥','🍑','🌈','⭐','🎃','🦉'];
 
 const DEFAULT_CATS=[
   ['c0','פלוץ במעלית','🛗'],['c1','פלוץ בירידה','⬇️'],['c2','פלוץ על הספה','🛋️'],['c3','פלוץ לפני קקי','💩'],['c4','פלוץ מתחת לשמיכה','🛏️'],
@@ -819,7 +821,8 @@ function drawMember(){
   $('mGender').innerHTML=GENDERS.map(g=>`<button type="button" class="chip ${mState.gender===g?'on':''}" data-mg="${g}">${g}</button>`).join('');
   $('mRel').innerHTML=REL.map(r=>`<button type="button" class="chip ${mState.rel===r.k?'on':''}" data-mr="${r.k}">${r.e} ${r.l}</button>`).join('');
   $('mCustomWrap').hidden=mState.rel!=='custom';
-  $('mEmoji').innerHTML=EMOJIS.map(e=>`<button type="button" class="chip ${mState.emoji===e?'on':''}" data-me="${e}">${e}</button>`).join('');
+  const emojis=[...new Set([...(EMOJI_BY_GENDER[mState.gender]||[]),...EMOJIS_MORE])];
+  $('mEmoji').innerHTML=emojis.map(e=>`<button type="button" class="chip ${mState.emoji===e?'on':''}" data-me="${e}">${e}</button>`).join('');
 }
 function openMember(id){
   const p=id?db.people.find(x=>x.id===id):null;

@@ -608,6 +608,7 @@ function viewHome(){
     <div class="bignum"><b id="total" data-v="${t}">${t}</b><span>פלוצים ששרדתם</span></div>
     ${dates}
   </section>
+  <section class="card"><h2>🕘 האחרונים</h2>${recent}</section>
   <section class="card">
     <h2>🏆 הפרס הבא של הבית</h2>
     <div class="muted">${nextP?`עוד <b>${nextP.n-t}</b> פלוצים עד ${nextP.icon} ${esc(nextP.name)}`:'סיימתם את כל הפרסים 💀 אתם הגרסה הכי מסוכנת של האהבה'}</div>
@@ -621,7 +622,7 @@ function viewHome(){
     <input class="search" id="catSearch" type="search" placeholder="חיפוש סוג פלוץ (למשל: ירידה)" aria-label="חיפוש סוג פלוץ">
     <div class="tiles">${tiles}</div>
   </section>
-  <section class="card"><h2>🕘 האחרונים</h2>${recent}</section>`;
+  `;
 }
 
 function entryHTML(e){

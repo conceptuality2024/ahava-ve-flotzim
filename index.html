@@ -203,6 +203,21 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
   <button class="primary" style="margin-top:14px" id="achClose">נהדר 🎉</button>
 </div></dialog>
 
+<dialog id="authDlg" aria-labelledby="authTitle"><div class="sheet">
+  <h3 id="authTitle">🔐 כניסה עם מייל</h3>
+  <div id="authStep1">
+    <div class="muted">נשלח אליכם קוד בן 6 ספרות למייל. לא צריך סיסמה ולא צריך חשבון גוגל.</div>
+    <div class="field">כתובת מייל<input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com"></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="cancel">ביטול</button><button class="primary sm" type="button" data-auth="send">שלחו לי קוד</button></div>
+  </div>
+  <div id="authStep2" hidden>
+    <div class="muted">שלחנו קוד ל־<b id="authTo"></b>. הקלידו אותו כאן:</div>
+    <div class="field">הקוד<input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="verify">כניסה</button></div>
+    <button class="ghost" type="button" data-auth="send" style="margin-top:10px;width:100%">שלחו שוב</button>
+  </div>
+  <div class="err" id="authErr"></div>
+</div></dialog>
 <dialog id="roomDlg" aria-labelledby="roomTitle"><div class="sheet">
   <h3 id="roomTitle">👨‍👩‍👧 משחק משפחתי</h3>
   <div class="muted">כדי שכולם ירשמו פלוצים מהטלפון שלהם, צריך משחק משותף.</div>
@@ -825,26 +840,65 @@ document.addEventListener('change',e=>{
   if(t.id==='cmpCat'){ window.__cmpCat=t.value; render(); }
 });
 
-/* ---------- family room (shared via Supabase) ---------- */
+/* ---------- family room (shared via Supabase, login by email code) ---------- */
 const SB_URL='https://aygccuicmoyvxoxlcsvk.supabase.co';
 const SB_KEY='sb_publishable_CI5dy5mz41CQcyrq540XSw_SCzstuc3';
-const ROOM_KEY='ahava-room-code', ADMIN_KEY='ahava-room-admin', ASKED_KEY='ahava-room-asked';
+const ROOM_KEY='ahava-room-code', AUTH_KEY='ahava-auth', ASKED_KEY='ahava-room-asked';
 const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-let room=null, adminTok=null;
+let room=null, isOwner=false, session=null, pendingAction=null, authEmail='';
 try{
   room=localStorage.getItem(ROOM_KEY)||null;
-  const a=JSON.parse(localStorage.getItem(ADMIN_KEY)||'null');
-  if(a&&a.code===room) adminTok=a.token;
+  session=JSON.parse(localStorage.getItem(AUTH_KEY)||'null');
 }catch(e){}
 let lastStamp=null, pushTimer=null, pushing=false, dirty=false, pollTimer=null;
 let outbox=[], flushing=false, warnedOffline=false;
-const canEdit=()=>!room||!!adminTok;
+const canEdit=()=>!room||isOwner;
 
-async function rpc(name,body){
-  const r=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+/* login: email code (no password, no Google needed) */
+function saveSession(s){
+  session=s;
+  try{ if(s) localStorage.setItem(AUTH_KEY,JSON.stringify(s)); else localStorage.removeItem(AUTH_KEY); }catch(e){}
+}
+function sessionFromAuth(j){
+  return { access:j.access_token, refresh:j.refresh_token, exp:Date.now()+(j.expires_in||3600)*1000,
+           email:(j.user&&j.user.email)||authEmail, id:(j.user&&j.user.id)||null };
+}
+async function refreshSession(){
+  if(!session||!session.refresh) return false;
+  try{
+    const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:session.refresh})});
+    if(!r.ok){ saveSession(null); return false; }
+    saveSession(sessionFromAuth(await r.json())); return true;
+  }catch(e){ return false; }
+}
+async function validToken(){
+  if(!session) return null;
+  if(session.exp-Date.now()<60000) await refreshSession();
+  return session?session.access:null;
+}
+async function rpc(name,body,retry=true){
+  const tok=await validToken();
+  const r=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+(tok||SB_KEY),'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(r.status===401&&retry&&session&&await refreshSession()) return rpc(name,body,false);
   if(!r.ok) throw new Error(name+' '+r.status);
   return r.json();
 }
+async function authCall(path,body){
+  const r=await fetch(SB_URL+'/auth/v1/'+path,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let j=null; try{ j=await r.json(); }catch(e){}
+  return {ok:r.ok,j};
+}
+function showAuthStep(n){
+  $('authStep1').hidden=n!==1; $('authStep2').hidden=n!==2;
+  if(n===1){ $('authEmail').value=authEmail; setTimeout(()=>$('authEmail').focus(),50); }
+  else setTimeout(()=>$('authCode').focus(),50);
+}
+function requireLogin(then){
+  if(session){ return then(); }
+  pendingAction=then; $('authErr').textContent=''; showAuthStep(1);
+  if(!$('authDlg').open) $('authDlg').showModal();
+}
+
 function normalize(d){
   if(!d||!Array.isArray(d.log)||!Array.isArray(d.people)) return null;
   d.cats=d.cats||[];
@@ -860,29 +914,21 @@ function newCode(){
   let s=''; for(const x of a) s+=CODE_CHARS[x%CODE_CHARS.length];
   return s;
 }
-function newToken(){
-  const a=new Uint8Array(16); crypto.getRandomValues(a);
-  return Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');
-}
-function setRoom(code,token){
-  room=code; adminTok=token||null;
-  try{
-    localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1');
-    if(adminTok) localStorage.setItem(ADMIN_KEY,JSON.stringify({code,token:adminTok}));
-    else localStorage.removeItem(ADMIN_KEY);
-  }catch(e){}
+function setRoom(code,owner){
+  room=code; isOwner=!!owner;
+  try{ localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1'); }catch(e){}
 }
 
-/* setup changes (people, categories, dates, baseline): creator only, the log stays on the server */
+/* setup changes (people, categories, dates, baseline): owner only, the log stays on the server */
 function queuePush(){
-  if(!room||!adminTok) return;
+  if(!room||!isOwner) return;
   dirty=true; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,400);
 }
 async function pushNow(){
-  if(!room||!adminTok||!dirty||pushing) return;
+  if(!room||!isOwner||!dirty||pushing) return;
   pushing=true; dirty=false;
   try{
-    const ok=await rpc('room_save',{p_code:room,p_admin:adminTok,p_state:db});
+    const ok=await rpc('rm_save',{p_code:room,p_state:db});
     if(ok){ lastStamp=null; warnedOffline=false; }
   }catch(e){
     dirty=true;
@@ -891,13 +937,13 @@ async function pushNow(){
   pushing=false;
   if(dirty) pushTimer=setTimeout(pushNow,2000);
 }
-/* undo, delete and reset: creator only */
+/* undo, delete and reset: owner only */
 async function pushLog(){
-  if(!room||!adminTok) return;
-  try{ await rpc('room_set_log',{p_code:room,p_admin:adminTok,p_log:db.log}); lastStamp=null; }
+  if(!room||!isOwner) return;
+  try{ await rpc('rm_set_log',{p_code:room,p_log:db.log}); lastStamp=null; }
   catch(e){ toast('לא הצלחנו לעדכן את היומן במשחק ⚠️'); }
 }
-/* plays: anyone in the room */
+/* plays: anyone logged in to the room */
 function sendEntry(ev){
   if(!room) return;
   outbox.push(ev); flushOutbox();
@@ -907,7 +953,7 @@ async function flushOutbox(){
   flushing=true;
   while(outbox.length&&room){
     try{
-      await rpc('room_add_entry',{p_code:room,p_entry:outbox[0]});
+      await rpc('rm_add_entry',{p_code:room,p_entry:outbox[0]});
       outbox.shift(); lastStamp=null; warnedOffline=false;
     }catch(e){
       if(!warnedOffline){ toast('אין חיבור כרגע, הרישום יישמר כשיחזור ⏳'); warnedOffline=true; }
@@ -918,15 +964,16 @@ async function flushOutbox(){
 }
 
 async function poll(){
-  if(!room||dirty||pushing||outbox.length||document.hidden) return;
+  if(!room||!session||dirty||pushing||outbox.length||document.hidden) return;
   const a=document.activeElement;
   if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
   try{
-    const rows=await rpc('room_get',{p_code:room});
+    const rows=await rpc('rm_get',{p_code:room});
     const row=rows&&rows[0];
     if(!row||row.updated_at===lastStamp||dirty||pushing||outbox.length) return;
     const local=normalize(row.state);
     lastStamp=row.updated_at;
+    if(isOwner!==!!row.is_owner) isOwner=!!row.is_owner;
     if(local){ db=local; saveLocal(); render(); }
   }catch(e){}
 }
@@ -935,16 +982,20 @@ function startPoll(){ clearInterval(pollTimer); pollTimer=setInterval(poll,5000)
 async function joinRoom(raw,silent){
   const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
   if(code.length<4){ if(!silent) toast('הקוד קצר מדי 🙃'); return false; }
+  if(!session){
+    if(!silent) requireLogin(()=>joinRoom(code,false).then(ok=>{ if(ok) startPoll(); }));
+    return false;
+  }
   try{
-    const rows=await rpc('room_get',{p_code:code});
+    const rows=await rpc('rm_get',{p_code:code});
     const row=rows&&rows[0];
     if(!row){ if(!silent) toast('לא מצאנו משחק עם הקוד הזה 🔍'); return false; }
     const local=normalize(row.state);
     if(!local){ if(!silent) toast('המשחק הזה לא תקין 😵'); return false; }
-    setRoom(code, room===code ? adminTok : null);
+    setRoom(code,row.is_owner);
     db=local; lastStamp=row.updated_at; dirty=false; saveLocal();
     startPoll(); render();
-    if(!silent) toast('הצטרפתם למשחק 🎉');
+    if(!silent) toast(isOwner?'פתחתם את המשחק שלכם 🎉':'הצטרפתם למשחק 🎉');
     return true;
   }catch(e){
     if(!silent) toast('אין חיבור כרגע, נסו שוב');
@@ -952,12 +1003,13 @@ async function joinRoom(raw,silent){
   }
 }
 async function createRoom(){
+  if(!session){ requireLogin(()=>createRoom()); return false; }
   try{
     for(let i=0;i<5;i++){
-      const code=newCode(), token=newToken();
-      const ok=await rpc('room_create',{p_code:code,p_state:db,p_admin:token});
+      const code=newCode();
+      const ok=await rpc('rm_create',{p_code:code,p_state:db});
       if(ok){
-        setRoom(code,token); lastStamp=null;
+        setRoom(code,true); lastStamp=null;
         startPoll(); render(); toast('המשחק נוצר 🎉');
         return true;
       }
@@ -968,29 +1020,75 @@ async function createRoom(){
 }
 function leaveRoom(){
   if(!confirm('לצאת מהמשחק המשותף? הנתונים יישארו במכשיר הזה ובמשחק עצמו.')) return;
-  room=null; adminTok=null; outbox=[];
-  try{ localStorage.removeItem(ROOM_KEY); localStorage.removeItem(ADMIN_KEY); }catch(e){}
+  room=null; isOwner=false; outbox=[];
+  try{ localStorage.removeItem(ROOM_KEY); }catch(e){}
   clearInterval(pollTimer); render(); toast('יצאתם מהמשחק');
+}
+function logout(){
+  if(!confirm('להתנתק מהחשבון במכשיר הזה?')) return;
+  leaveRoom_quiet(); saveSession(null); render(); toast('התנתקתם 👋');
+}
+function leaveRoom_quiet(){
+  room=null; isOwner=false; outbox=[];
+  try{ localStorage.removeItem(ROOM_KEY); }catch(e){}
+  clearInterval(pollTimer);
 }
 function roomLink(){ return location.origin+location.pathname+'?room='+room; }
 function roomSection(){
+  const account=session
+    ? `<div class="muted">מחוברים כ־${esc(session.email)} · <button class="ghost sm" data-auth="logout">התנתקות</button></div>`
+    : `<div class="muted">כדי לשחק ביחד צריך להתחבר עם מייל. לא צריך חשבון גוגל.</div>`;
   if(!room){
     return `<section class="card"><h2>👨‍👩‍👧 משחק משפחתי</h2>
-      <div class="muted">צרו משחק משותף כדי שכולם ירשמו פלוצים מהטלפון שלהם.</div>
+      ${account}
+      <div class="muted" style="margin-top:8px">צרו משחק משותף כדי שכולם ירשמו פלוצים מהטלפון שלהם.</div>
       <div class="row" style="margin-top:8px"><button class="primary sm" data-room="create">צרו משחק חדש</button></div>
       <div class="row" style="margin-top:10px"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
     </section>`;
   }
   return `<section class="card"><h2>👨‍👩‍👧 המשחק המשותף</h2>
-    <div class="muted">${adminTok?'אתם מנהלים את המשחק. רק אתם משנים הגדרות, ושאר בני המשפחה רושמים פלוצים.':'אתם משחקים ביחד. רק מי שיצר את המשחק משנה את ההגדרות.'}</div>
+    ${account}
+    <div class="muted" style="margin-top:8px">${isOwner?'אתם יצרתם את המשחק. רק אתם משנים הגדרות, ושאר בני המשפחה רושמים פלוצים.':'אתם משחקים ביחד. רק מי שיצר את המשחק משנה את ההגדרות.'}</div>
     <div style="font-size:24px;letter-spacing:4px;text-align:center;font-weight:900;color:var(--plum);margin:10px 0">${esc(room)}</div>
     <div class="row"><button class="primary sm" data-room="copy">📋 העתקת קישור</button>
     <a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('בואו לספור פלוצים ביחד 💨 '+roomLink())}" target="_blank" rel="noopener">💬 שליחה בוואטסאפ</a></div>
-    ${adminTok?`<div class="row" style="margin-top:10px"><button class="ghost" data-room="adminlink">🔑 קישור מנהל למכשירים שלי</button></div>
-    <div class="muted" style="margin-top:6px">הקישור הזה נותן שליטה מלאה במשחק. שלחי אותו רק לעצמך.</div>`:''}
     <div class="row" style="margin-top:10px"><button class="danger" data-room="leave">יציאה מהמשחק</button></div>
   </section>`;
 }
+
+/* auth dialog: email, then the 6 digit code */
+document.addEventListener('click',async e=>{
+  const a=e.target.closest('[data-auth]'); if(!a) return;
+  const act=a.dataset.auth;
+  if(act==='cancel'){ $('authDlg').close(); pendingAction=null; return; }
+  if(act==='back'){ showAuthStep(1); return; }
+  if(act==='logout'){ logout(); return; }
+  if(act==='send'){
+    const step2=!$('authStep2').hidden;
+    const email=(step2?authEmail:$('authEmail').value).trim().toLowerCase();
+    if(!/^\S+@\S+\.\S+$/.test(email)){ $('authErr').textContent='כתבו מייל תקין 🙂'; return; }
+    authEmail=email;
+    $('authErr').textContent='שולחים...';
+    const r=await authCall('otp',{email,create_user:true}).catch(()=>({ok:false}));
+    if(!r.ok){ $('authErr').textContent='לא הצלחנו לשלוח קוד, נסו שוב בעוד דקה'; return; }
+    $('authTo').textContent=email; $('authCode').value=''; $('authErr').textContent='';
+    showAuthStep(2); toast('שלחנו קוד למייל 📩');
+    return;
+  }
+  if(act==='verify'){
+    const code=$('authCode').value.replace(/\D/g,'');
+    if(code.length<6){ $('authErr').textContent='הקוד בן 6 ספרות'; return; }
+    $('authErr').textContent='בודקים...';
+    const r=await authCall('verify',{type:'email',email:authEmail,token:code}).catch(()=>({ok:false}));
+    if(!r.ok||!r.j||!r.j.access_token){ $('authErr').textContent='הקוד לא נכון או שפג תוקפו'; return; }
+    saveSession(sessionFromAuth(r.j));
+    $('authDlg').close(); $('authErr').textContent='';
+    toast('נכנסתם 👋');
+    const next=pendingAction; pendingAction=null;
+    if(next) await next(); else render();
+  }
+});
+
 document.addEventListener('click',async e=>{
   const b=e.target.closest('[data-room]'); if(!b) return;
   const act=b.dataset.room;
@@ -1002,23 +1100,21 @@ document.addEventListener('click',async e=>{
   }
   if(act==='later'){ try{ localStorage.setItem(ASKED_KEY,'1'); }catch(err){} $('roomDlg').close(); return; }
   if(act==='copy'){ try{ await navigator.clipboard.writeText(roomLink()); toast('הקישור הועתק 📋'); }catch(err){ toast('העתיקו את הקישור מהדפדפן'); } return; }
-  if(act==='adminlink'){
-    const link=location.origin+location.pathname+'?room='+room+'&admin='+adminTok;
-    try{ await navigator.clipboard.writeText(link); toast('קישור המנהל הועתק 🔑'); }catch(err){ toast('לא הצלחנו להעתיק את הקישור'); }
-    return;
-  }
   if(act==='leave'){ leaveRoom(); return; }
 });
 
 render();
 (async()=>{
   const params=new URLSearchParams(location.search);
-  const q=params.get('room'), adm=params.get('admin');
-  const qc=(q||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
-  if(qc&&adm){ setRoom(qc,adm); }
-  if(q||adm){ try{ history.replaceState(null,'',location.pathname); }catch(e){} }
-  if(qc){ await joinRoom(qc,false); startPoll(); return; }
-  if(room){ await joinRoom(room,true); startPoll(); return; }
+  const q=(params.get('room')||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(params.get('room')!==null||params.get('admin')!==null){ try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+  if(q){
+    if(session){ await joinRoom(q,false); startPoll(); }
+    else requireLogin(async()=>{ await joinRoom(q,false); startPoll(); });
+    return;
+  }
+  if(room&&session){ await joinRoom(room,true); startPoll(); }
+  else if(room&&!session){ leaveRoom_quiet(); }
   let asked=false; try{ asked=localStorage.getItem(ASKED_KEY)==='1'; }catch(e){}
   if(!asked) $('roomDlg').showModal();
 })();

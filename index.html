@@ -986,6 +986,8 @@ function roomSection(){
     <div style="font-size:24px;letter-spacing:4px;text-align:center;font-weight:900;color:var(--plum);margin:10px 0">${esc(room)}</div>
     <div class="row"><button class="primary sm" data-room="copy">📋 העתקת קישור</button>
     <a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('בואו לספור פלוצים ביחד 💨 '+roomLink())}" target="_blank" rel="noopener">💬 שליחה בוואטסאפ</a></div>
+    ${adminTok?`<div class="row" style="margin-top:10px"><button class="ghost" data-room="adminlink">🔑 קישור מנהל למכשירים שלי</button></div>
+    <div class="muted" style="margin-top:6px">הקישור הזה נותן שליטה מלאה במשחק. שלחי אותו רק לעצמך.</div>`:''}
     <div class="row" style="margin-top:10px"><button class="danger" data-room="leave">יציאה מהמשחק</button></div>
   </section>`;
 }
@@ -1000,13 +1002,22 @@ document.addEventListener('click',async e=>{
   }
   if(act==='later'){ try{ localStorage.setItem(ASKED_KEY,'1'); }catch(err){} $('roomDlg').close(); return; }
   if(act==='copy'){ try{ await navigator.clipboard.writeText(roomLink()); toast('הקישור הועתק 📋'); }catch(err){ toast('העתיקו את הקישור מהדפדפן'); } return; }
+  if(act==='adminlink'){
+    const link=location.origin+location.pathname+'?room='+room+'&admin='+adminTok;
+    try{ await navigator.clipboard.writeText(link); toast('קישור המנהל הועתק 🔑'); }catch(err){ toast('לא הצלחנו להעתיק את הקישור'); }
+    return;
+  }
   if(act==='leave'){ leaveRoom(); return; }
 });
 
 render();
 (async()=>{
-  const q=new URLSearchParams(location.search).get('room');
-  if(q){ await joinRoom(q,false); startPoll(); return; }
+  const params=new URLSearchParams(location.search);
+  const q=params.get('room'), adm=params.get('admin');
+  const qc=(q||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(qc&&adm){ setRoom(qc,adm); }
+  if(q||adm){ try{ history.replaceState(null,'',location.pathname); }catch(e){} }
+  if(qc){ await joinRoom(qc,false); startPoll(); return; }
   if(room){ await joinRoom(room,true); startPoll(); return; }
   let asked=false; try{ asked=localStorage.getItem(ASKED_KEY)==='1'; }catch(e){}
   if(!asked) $('roomDlg').showModal();

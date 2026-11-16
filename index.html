@@ -32,6 +32,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .view-in{animation:viewIn .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+.dcta{display:block;width:100%;margin:0 0 12px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,var(--gold),#ff9b3d);color:#4a2e00;font-weight:900;font-size:16px;box-shadow:0 8px 20px rgba(247,183,51,.45);animation:pulse 1.8s ease-in-out infinite;transition:transform .15s}
+.dcta:active{transform:scale(.96)}
+.dcta.soft{background:#fff;color:var(--plum);border:2px dashed var(--pink);box-shadow:none;animation:none;font-size:15px;padding:11px 14px}
 .pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .pick{background:#fff;border:2px solid var(--soft);border-radius:18px;padding:14px 8px;font-weight:800;color:var(--plum);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--shadow);transition:transform .12s;min-width:0}
 .pick .av{font-size:32px;line-height:1}
@@ -558,10 +561,12 @@ function viewHome(){
   const dates=(tt||st)?`<div class="dates">
       ${tt?`<div>💘 מאז ההיכרות<br><b>${dateText(tt)}</b></div>`:''}
       ${st?`<div>🏠 ביחד מאז ${fmtDate(db.start)}<br><b>${st.days} ימים</b></div>`:''}
-    </div>`:`<div class="muted" style="margin-top:10px">הוסיפו תאריך היכרות והתחלה בהגדרות ⚙️</div>`;
+    </div>`:'';
+  const ctas=(!tt?`<button class="dcta" data-act="goSettings" data-focus="meetDate">💘 הוסיפו תאריך היכרות ותתחילו לספור ימים</button>`:'')
+    +(tt&&!st?`<button class="dcta soft" data-act="goSettings" data-focus="startDate">🏠 הוסיפו תאריך תחילת הבית</button>`:'');
   const recent=db.log.slice(-3).reverse().map(entryHTML).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
   return `
-  <section class="card counter">
+  <section class="card counter">${ctas}
     <h1>כמה פלוצים שרדתם ביחד?</h1>
     <p class="sub">עד שהריח יפריד בינינו</p>
     <div class="bignum"><b id="total" data-v="${t}">${t}</b><span>פלוצים ששרדתם</span></div>
@@ -858,6 +863,10 @@ document.addEventListener('click',e=>{
   const btn=e.target.closest('[data-act]');
   if(btn){
     const act=btn.dataset.act, cid=btn.dataset.cat, id=btn.dataset.id;
+    if(act==='goSettings'){
+      tab='settings'; render(); window.scrollTo({top:0});
+      const f=btn.dataset.focus; setTimeout(()=>{ const el=$(f); if(el) el.focus(); },60); return;
+    }
     if(act==='edit') return manualEdit(cid);
     if(act==='detail') return openForm(cid);
     if(act==='undo') return undo();

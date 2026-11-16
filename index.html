@@ -38,6 +38,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .rc{flex:0 0 auto;background:var(--soft);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--plum);min-width:104px}
 .rc .re{font-size:22px;line-height:1.1}
 .rc small{color:var(--muted);font-size:11px}
+.lift{transform:scale(1.06);box-shadow:0 16px 30px rgba(122,31,75,.32);z-index:2;opacity:.95;touch-action:none;transition:transform .12s}
+.tile .fav{position:absolute;bottom:6px;left:8px;font-size:17px;color:var(--muted);padding:4px;line-height:1;opacity:.7}
+.tile .fav.on{color:#e0245e;opacity:1}
+.tile.is-fav{box-shadow:0 0 0 2px #ffc2d6,var(--shadow)}
+.ghost.on{background:var(--pink);color:#fff;border-color:var(--pink)}
 .dcta{display:block;width:100%;margin:0 0 12px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,var(--gold),#ff9b3d);color:#4a2e00;font-weight:900;font-size:16px;box-shadow:0 8px 20px rgba(247,183,51,.45);animation:pulse 1.8s ease-in-out infinite;transition:transform .15s}
 .dcta:active{transform:scale(.96)}
 .dcta.soft{background:#fff;color:var(--plum);border:2px dashed var(--pink);box-shadow:none;animation:none;font-size:15px;padding:11px 14px}
@@ -391,6 +396,7 @@ const fmtDate=ts=>new Date(ts).toLocaleDateString('he-IL',{day:'numeric',month:'
 const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n);
 const plural=(n,one,many)=>n===1?one:`${n} ${many}`;
 let who=null;
+let reorderMode=false, suppressClick=false, dragState=null;
 const curWho=()=>{ if(!db.people.some(p=>p.id===who)) who=(realPeople()[0]||db.people[0]).id; return who; };
 
 function ymd(from){
@@ -587,6 +593,16 @@ function sortedCats(){
     .sort((a,b)=>(b.n-a.n)||(b.last-a.last)||(a.i-b.i))
     .map(x=>x.c);
 }
+/* category order: manual order if set, otherwise the smart order; favourites always first */
+function orderedCats(){
+  let base=sortedCats();
+  if(Array.isArray(db.catOrder)&&db.catOrder.length){
+    const idx=new Map(db.catOrder.map((id,i)=>[id,i]));
+    base=[...db.cats].sort((a,b)=>(idx.has(a.id)?idx.get(a.id):1e9)-(idx.has(b.id)?idx.get(b.id):1e9));
+  }
+  const favs=new Set(db.favs||[]);
+  return [...base.filter(c=>favs.has(c.id)),...base.filter(c=>!favs.has(c.id))];
+}
 function viewHome(){
   const t=total(), cid=curWho(), cur=person(cid);
   const tt=ymd(db.meet), st=ymd(db.start);
@@ -595,7 +611,9 @@ function viewHome(){
   const pct=nextP?Math.round((t-prevN)/(nextP.n-prevN)*100):100;
   const members=db.people.map(p=>`<button class="who ${p.id===cid?'on':''}" data-who="${p.id}" aria-pressed="${p.id===cid}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}<small>${pTotal(p.id)} 💨</small></button>`).join('')
     +(canEdit()?`<button class="who add" data-act="addPerson"><span class="av">➕</span>הוספה</button>`:'');
-  const tiles=sortedCats().map(c=>`<div class="tile" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
+  const favSet=new Set(db.favs||[]);
+  const tiles=orderedCats().map(c=>`<div class="tile ${favSet.has(c.id)?'is-fav':''}" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
+      ${canEdit()?`<button class="fav ${favSet.has(c.id)?'on':''}" data-act="fav" data-cat="${c.id}" aria-label="${favSet.has(c.id)?'הסרה ממועדפים':'הוספה למועדפים'}">${favSet.has(c.id)?'♥':'♡'}</button>`:''}
       <span class="c">${cCount(cid,c.id)}</span>
       ${canEdit()?`<button class="edit" data-act="edit" data-cat="${c.id}" aria-label="קביעה ידנית">✏️</button>`:''}
       <span class="e">${c.emoji}</span><div class="n">${esc(c.name)}</div>
@@ -627,6 +645,9 @@ function viewHome(){
     ${cid!=='none'?personCard(cid):'<div class="muted">בחרו בן משפחה כדי לשייך את הפלוצים</div>'}
 
     <input class="search" id="catSearch" type="search" placeholder="חיפוש סוג פלוץ (למשל: ירידה)" aria-label="חיפוש סוג פלוץ">
+    ${canEdit()?`<div class="row" style="justify-content:space-between;margin-top:10px">
+      <span class="muted">${reorderMode?'גררו קטגוריה למקום חדש. לחיצה ארוכה ואז גרירה.':'מועדפים תמיד למעלה'}</span>
+      <span class="row" style="gap:6px">${reorderMode?'<button class="ghost" data-act="resetOrder">סידור אוטומטי</button>':''}<button class="ghost ${reorderMode?'on':''}" data-act="toggleReorder">${reorderMode?'סיימתי':'↕️ סידור'}</button></span></div>`:''}
     <div class="tiles">${tiles}</div>
   </section>
   `;
@@ -945,6 +966,7 @@ $('muteBtn').textContent=db.muted?'🔇':'🔊';
 $('muteBtn').onclick=()=>{ db.muted=!db.muted; save(); $('muteBtn').textContent=db.muted?'🔇':'🔊'; if(db.muted) stopSound(); };
 
 document.addEventListener('click',e=>{
+  if(suppressClick){ e.preventDefault(); e.stopPropagation(); return; }
   const wb=e.target.closest('[data-who]');
   if(wb&&!e.target.closest('[data-act]')){ who=wb.dataset.who; render(); return; }
   const btn=e.target.closest('[data-act]');
@@ -953,6 +975,14 @@ document.addEventListener('click',e=>{
     if(act==='goSettings'){
       tab='settings'; render(); window.scrollTo({top:0});
       const f=btn.dataset.focus; setTimeout(()=>{ const el=$(f); if(el) el.focus(); },60); return;
+    }
+    if(act==='toggleReorder'){ reorderMode=!reorderMode; render(); return; }
+    if(act==='resetOrder'){ db.catOrder=null; save(); render(); toast('חזרנו לסידור האוטומטי'); return; }
+    if(act==='fav'){
+      db.favs=Array.isArray(db.favs)?db.favs:[];
+      const on=db.favs.includes(cid);
+      db.favs=on?db.favs.filter(x=>x!==cid):[...db.favs,cid];
+      save(); render(); toast(on?'הוסר מהמועדפים':'נוסף למועדפים ♥'); return;
     }
     if(act==='edit') return manualEdit(cid);
     if(act==='detail') return openForm(cid);
@@ -998,11 +1028,59 @@ document.addEventListener('click',e=>{
   }
   if(e.target.closest('[data-pick-cancel]')){ $('whoDlg').close(); return; }
   const tile=e.target.closest('.tile');
-  if(tile) openWhoPick(tile,tile.dataset.tile);
+  if(tile&&!reorderMode) openWhoPick(tile,tile.dataset.tile);
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tile')) openWhoPick(e.target,e.target.dataset.tile);
+  if(e.key==='Enter'&&!reorderMode&&e.target.classList&&e.target.classList.contains('tile')) openWhoPick(e.target,e.target.dataset.tile);
 });
+/* long press then drag. The who bar is always draggable for the owner, tiles only in reorder mode */
+(()=>{
+  const view=$('view');
+  const WHO='.hscroll .who[data-who]', TILE='.tiles .tile';
+  view.addEventListener('pointerdown',e=>{
+    if(!canEdit()) return;
+    const who=e.target.closest(WHO), tile=e.target.closest(TILE);
+    let kind=null, it=null;
+    if(who){ kind='who'; it=who; }
+    else if(tile&&reorderMode){ kind='tile'; it=tile; }
+    if(!it||(kind==='tile'&&e.target.closest('button'))) return;
+    const d={kind,it,x:e.clientX,y:e.clientY,on:false,t:null};
+    d.t=setTimeout(()=>{ d.on=true; it.classList.add('lift'); try{ navigator.vibrate&&navigator.vibrate(15); }catch(err){} },350);
+    dragState=d;
+  });
+  view.addEventListener('pointermove',e=>{
+    const d=dragState; if(!d) return;
+    if(!d.on){ if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>8){ clearTimeout(d.t); dragState=null; } return; }
+    const under=document.elementFromPoint(e.clientX,e.clientY);
+    const sel=d.kind==='who'?WHO:TILE;
+    const tgt=under&&under.closest(sel);
+    if(tgt&&tgt!==d.it&&tgt.parentElement===d.it.parentElement){
+      const kids=[...d.it.parentElement.children].filter(k=>k.matches(sel));
+      if(kids.indexOf(d.it)<kids.indexOf(tgt)) tgt.after(d.it); else tgt.before(d.it);
+    }
+  });
+  view.addEventListener('touchmove',e=>{ if(dragState&&dragState.on) e.preventDefault(); },{passive:false});
+  const endDrag=()=>{
+    const d=dragState; if(!d) return;
+    clearTimeout(d.t); dragState=null;
+    if(!d.on) return;
+    d.it.classList.remove('lift');
+    suppressClick=true; setTimeout(()=>{ suppressClick=false; },400);
+    const parent=d.it.parentElement;
+    if(d.kind==='who'){
+      const ids=[...parent.querySelectorAll('.who[data-who]')].map(x=>x.dataset.who);
+      const byId=new Map(db.people.map(p=>[p.id,p]));
+      db.people=[...ids.map(i=>byId.get(i)).filter(Boolean),...db.people.filter(p=>!ids.includes(p.id))];
+      save(); render();
+    }else{
+      db.catOrder=[...parent.querySelectorAll('.tile')].map(x=>x.dataset.tile);
+      save(); render();
+    }
+  };
+  view.addEventListener('pointerup',endDrag);
+  view.addEventListener('pointercancel',endDrag);
+})();
+
 document.addEventListener('input',e=>{ if(e.target.id==='catSearch') filterTiles(e.target.value); });
 document.addEventListener('change',e=>{
   const t=e.target;

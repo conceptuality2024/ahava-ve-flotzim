@@ -19,14 +19,19 @@
 <meta name="twitter:description" content="כמה פלוצים שרדתם ביחד? עד שהריח יפריד בינינו.">
 <meta name="twitter:image" content="https://ahava-ve-flotzim.vercel.app/og.png">
 <title>אהבה ופלוצים 💗💨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;800;900&display=swap">
 <style>
-:root{--pink:#ff4f96;--pink2:#ff8ab8;--soft:#ffe1ef;--lilac:#efe3ff;--peach:#ffe6d5;--mint:#d9f7ec;--plum:#7a1f4b;--ink:#2b1322;--muted:#8a6276;--gold:#f7b733;--shadow:0 10px 26px rgba(122,31,75,.13);--r:22px}
+:root{--pink:#ff4f96;--pink2:#ff8ab8;--soft:#ffe1ef;--lilac:#efe3ff;--peach:#ffe6d5;--mint:#d9f7ec;--plum:#7a1f4b;--ink:#2b1322;--muted:#6b4a5b;--gold:#f7b733;--shadow:0 10px 26px rgba(122,31,75,.13);--r:22px}
 *{box-sizing:border-box}
 html,body{margin:0}
-body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0%,#fff6fb,transparent 40%),linear-gradient(170deg,#ffeaf4,#ffd0e6 55%,#f7b5d4);min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px));-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+body{font-family:Heebo,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0%,#fff6fb,transparent 40%),linear-gradient(170deg,#ffeaf4,#ffd0e6 55%,#f7b5d4);min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px));-webkit-tap-highlight-color:transparent;overflow-x:hidden}
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.view-in{animation:viewIn .35s cubic-bezier(.2,.8,.2,1)}
+@keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
 .wrap{max-width:480px;margin:0 auto;padding:14px 14px 24px}
 .top{display:flex;justify-content:space-between;align-items:center}
 .brand{font-weight:900;font-size:21px;color:var(--plum)}
@@ -103,7 +108,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .lbr b{text-align:left;font-variant-numeric:tabular-nums}
 .crown{animation:float 2s ease-in-out infinite;display:inline-block}
 .nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid #f7cfe2;display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
-.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);padding:6px 10px;border-radius:16px;min-width:66px;transition:background .2s}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;font-weight:600;min-height:48px;color:var(--muted);padding:6px 10px;border-radius:16px;min-width:66px;transition:background .2s}
 .nav button .i{font-size:21px;transition:transform .2s}
 .nav button.on{color:var(--plum);font-weight:800;background:var(--soft)}
 .nav button.on .i{transform:scale(1.2)}
@@ -206,12 +211,13 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
 <dialog id="authDlg" aria-labelledby="authTitle"><div class="sheet">
   <h3 id="authTitle">👋 כניסה למשחק</h3>
   <div id="auth_choose">
-    <div class="muted">בחרו איך להיכנס. אפשר גם בלי מייל.</div>
+    <div class="muted">בחרו איך להיכנס. אפשר גם בלי מייל. המייל נותן לכם גישה מכל מכשיר.</div>
     <div class="row" style="flex-direction:column;gap:8px;margin-top:12px"><button class="primary sm" type="button" data-auth="choose-email">כניסה עם מייל (קוד)</button><button class="ghost" type="button" data-auth="choose-name">כניסה בשם בלבד</button></div>
     <div class="row" style="margin-top:10px"><button class="ghost" type="button" data-auth="cancel">ביטול</button></div>
   </div>
   <div id="auth_name" hidden>
-    <div class="field">השם שלך<input id="authName" type="text" maxlength="20" placeholder="למשל: רומי, מיקי, אבא"></div>
+    <div class="field">השם שלך<input id="authName" type="text" maxlength="20" placeholder="למשל: רומי, מיקי, אבא" autocomplete="nickname"></div>
+    <div class="hint">בלי מייל ובלי סיסמה. השם הזה יופיע בלוח המשפחתי.</div>
     <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="enter">היכנסו</button></div>
   </div>
   <div id="auth_email" hidden>
@@ -221,6 +227,7 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
   <div id="auth_code" hidden>
     <div class="muted">שלחנו קוד ל־<b id="authTo"></b>. הקלידו אותו:</div>
     <div class="field">הקוד<input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>
+    <div class="hint">לא הגיע? בדקו בתיקיית הספאם, או לחצו שלחו שוב בעוד דקה.</div>
     <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="verify">כניסה</button></div>
     <button class="ghost" type="button" id="authResend" data-auth="resend" style="margin-top:10px;width:100%">שלחו שוב</button>
   </div>
@@ -479,6 +486,15 @@ function countUp(el,to){
   })(t0);
 }
 function buzz(ms){ try{ navigator.vibrate&&navigator.vibrate(ms); }catch(e){} }
+function sfxTick(){
+  if(db.muted) return;
+  try{
+    const c=ctxA(), t=c.currentTime, o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.setValueAtTime(660,t); o.frequency.exponentialRampToValueAtTime(990,t+.05);
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.07,t+.01); g.gain.exponentialRampToValueAtTime(.0001,t+.09);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+.1);
+  }catch(e){}
+}
 
 /* ---------- state and views ---------- */
 let tab='home';
@@ -611,8 +627,7 @@ function viewGame(){
 
 function viewSettings(){
   if(canEdit()) return viewSettingsFull();
-  return `${roomSection()}
-  <section class="card"><h2>🗂️ נתונים</h2><div class="row"><button class="ghost" data-act="export">ייצוא JSON</button></div></section>`;
+  return `${roomSection()}`;
 }
 function viewSettingsFull(){
   const members=realPeople().map(p=>`<div class="entry" style="align-items:center">
@@ -639,7 +654,7 @@ function viewSettingsFull(){
   </section>
   ${roomSection()}
   <section class="card"><h2>📤 שיתוף</h2>
-    <div class="muted">התחברות במייל או Google תגיע בהמשך. כרגע הנתונים נשמרים במכשיר הזה.</div>
+    <div class="muted">הנתונים של המשחק נשמרים בחשבון המשחק המשותף. מי שיש לו את הקוד יכול להצטרף.</div>
     <div class="row" style="margin-top:8px"><a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('כמה פלוצים שרדנו ביחד? 💨 '+location.href)}" target="_blank" rel="noopener">💬 שתפו בוואטסאפ</a></div>
   </section>
   <section class="card"><h2>🗂️ נתונים</h2>
@@ -793,7 +808,11 @@ $('mSave').onclick=()=>{
 };
 
 /* ---------- events ---------- */
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; render(); window.scrollTo({top:0}); });
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{
+  tab=b.dataset.tab; sfxTick(); buzz(8); render(); window.scrollTo({top:0});
+  document.querySelectorAll('.nav button').forEach(x=>x.setAttribute('aria-current',x.dataset.tab===tab?'page':'false'));
+  if(!reduce){ const v=$('view'); v.classList.remove('view-in'); void v.offsetWidth; v.classList.add('view-in'); }
+});
 $('gearBtn').onclick=()=>{ tab='settings'; render(); window.scrollTo({top:0}); };
 $('muteBtn').textContent=db.muted?'🔇':'🔊';
 $('muteBtn').onclick=()=>{ db.muted=!db.muted; save(); $('muteBtn').textContent=db.muted?'🔇':'🔊'; if(db.muted) stopSound(); };
@@ -1170,6 +1189,14 @@ document.addEventListener('click',async e=>{
     toast(`נכנסתם, ${session.name} 👋`);
     await afterLogin();
   }
+});
+
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter') return;
+  const next={authName:'enter',authEmail:'send',authCode:'verify'}[e.target&&e.target.id];
+  if(!next) return;
+  e.preventDefault();
+  const btn=document.querySelector(`[data-auth="${next}"]`); if(btn) btn.click();
 });
 
 document.addEventListener('click',async e=>{

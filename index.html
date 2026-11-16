@@ -204,10 +204,26 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
 </div></dialog>
 
 <dialog id="authDlg" aria-labelledby="authTitle"><div class="sheet">
-  <h3 id="authTitle">👋 איך קוראים לך?</h3>
-  <div class="muted">השם יופיע במשחק. בלי חשבון ובלי מייל.</div>
-  <div class="field">השם שלך<input id="authName" type="text" maxlength="20" placeholder="למשל: רומי, מיקי, אבא"></div>
-  <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="cancel">ביטול</button><button class="primary sm" type="button" data-auth="enter">היכנסו</button></div>
+  <h3 id="authTitle">👋 כניסה למשחק</h3>
+  <div id="auth_choose">
+    <div class="muted">בחרו איך להיכנס. אפשר גם בלי מייל.</div>
+    <div class="row" style="flex-direction:column;gap:8px;margin-top:12px"><button class="primary sm" type="button" data-auth="choose-email">כניסה עם מייל (קוד)</button><button class="ghost" type="button" data-auth="choose-name">כניסה בשם בלבד</button></div>
+    <div class="row" style="margin-top:10px"><button class="ghost" type="button" data-auth="cancel">ביטול</button></div>
+  </div>
+  <div id="auth_name" hidden>
+    <div class="field">השם שלך<input id="authName" type="text" maxlength="20" placeholder="למשל: רומי, מיקי, אבא"></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="enter">היכנסו</button></div>
+  </div>
+  <div id="auth_email" hidden>
+    <div class="field">כתובת מייל<input id="authEmail" type="email" inputmode="email" autocomplete="email" placeholder="name@example.com"></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="send">שלחו לי קוד</button></div>
+  </div>
+  <div id="auth_code" hidden>
+    <div class="muted">שלחנו קוד ל־<b id="authTo"></b>. הקלידו אותו:</div>
+    <div class="field">הקוד<input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>
+    <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="verify">כניסה</button></div>
+    <button class="ghost" type="button" id="authResend" data-auth="resend" style="margin-top:10px;width:100%">שלחו שוב</button>
+  </div>
   <div class="err" id="authErr"></div>
 </div></dialog>
 <dialog id="roomDlg" aria-labelledby="roomTitle"><div class="sheet">
@@ -873,14 +889,56 @@ async function rpc(name,body,retry=true){
   return r.json();
 }
 
-/* sign in with a name only: an anonymous account on this device */
+/* login: email code, or a name only (anonymous account on this device) */
+let emailPending='', cooldownUntil=0, cooldownTimer=null;
+const COOLDOWN_SEC=60;
+function showAuthView(v){
+  ['choose','name','email','code'].forEach(k=>{ $('auth_'+k).hidden=k!==v; });
+  if(v==='name') setTimeout(()=>$('authName').focus(),50);
+  if(v==='email') setTimeout(()=>$('authEmail').focus(),50);
+  if(v==='code') setTimeout(()=>$('authCode').focus(),50);
+}
 function requireLogin(pending){
   if(session) return true;
   pendingAfterLogin=pending||'';
   $('authErr').textContent='';
+  showAuthView('choose');
   if(!$('authDlg').open) $('authDlg').showModal();
-  setTimeout(()=>$('authName').focus(),50);
   return false;
+}
+function secondsLeft(){ return Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000)); }
+function updateResend(){
+  const btn=$('authResend'); if(!btn) return;
+  const left=secondsLeft();
+  btn.disabled=left>0;
+  btn.textContent=left>0?`שלחו שוב בעוד ${left} שניות`:'שלחו שוב';
+  if(left<=0){ clearInterval(cooldownTimer); cooldownTimer=null; }
+}
+function startCooldown(sec){
+  cooldownUntil=Date.now()+sec*1000;
+  updateResend();
+  clearInterval(cooldownTimer); cooldownTimer=setInterval(updateResend,1000);
+}
+async function sendEmailCode(email){
+  const r=await fetch(SB_URL+'/auth/v1/otp',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({email,create_user:true})});
+  return r.status;
+}
+async function verifyEmailCode(email,token){
+  const r=await fetch(SB_URL+'/auth/v1/verify',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'email',email,token})});
+  if(!r.ok) return false;
+  const j=await r.json().catch(()=>null);
+  if(!j||!j.access_token) return false;
+  saveSession({access:j.access_token,refresh:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000,name:email.split('@')[0],id:(j.user&&j.user.id)||null,email});
+  return true;
+}
+async function sendCodeTo(email){
+  if(secondsLeft()>0){ $('authErr').textContent=`כבר שלחנו קוד. אפשר לשלוח שוב בעוד ${secondsLeft()} שניות`; return false; }
+  $('authErr').textContent='שולחים...';
+  let status=0; try{ status=await sendEmailCode(email); }catch(e){}
+  startCooldown(COOLDOWN_SEC);
+  if(status===429){ $('authErr').textContent='שלחנו כבר קוד לאחרונה. נסו שוב בעוד דקה, ובדקו גם בספאם'; return true; }
+  if(status<200||status>=300){ $('authErr').textContent='לא הצלחנו לשלוח קוד, נסו שוב בעוד דקה'; return false; }
+  $('authErr').textContent=''; return true;
 }
 async function guestLogin(name){
   const r=await fetch(SB_URL+'/auth/v1/signup',{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify({data:{name}})});
@@ -1069,12 +1127,21 @@ function roomSection(){
   </section>`;
 }
 
-/* name dialog */
+/* login dialog */
+async function afterLogin(){
+  const next=pendingAfterLogin; pendingAfterLogin='';
+  if(next==='CREATE') await createRoom();
+  else if(next){ await joinRoom(next,false); startPoll(); }
+  else render();
+}
 document.addEventListener('click',async e=>{
   const a=e.target.closest('[data-auth]'); if(!a) return;
   const act=a.dataset.auth;
   if(act==='cancel'){ $('authDlg').close(); pendingAfterLogin=''; return; }
   if(act==='logout'){ logout(); return; }
+  if(act==='choose-name'){ $('authErr').textContent=''; showAuthView('name'); return; }
+  if(act==='choose-email'){ $('authErr').textContent=''; showAuthView('email'); return; }
+  if(act==='back'){ $('authErr').textContent=''; showAuthView('choose'); return; }
   if(act==='enter'){
     const name=$('authName').value.trim();
     if(name.length<2){ $('authErr').textContent='כתבו שם, לפחות שתי אותיות 🙂'; return; }
@@ -1083,10 +1150,25 @@ document.addEventListener('click',async e=>{
     if(!ok){ $('authErr').textContent='לא הצלחנו להיכנס, נסו שוב'; return; }
     $('authDlg').close(); $('authErr').textContent='';
     toast(`ברוכים הבאים, ${name} 👋`);
-    const next=pendingAfterLogin; pendingAfterLogin='';
-    if(next==='CREATE') await createRoom();
-    else if(next) { await joinRoom(next,false); startPoll(); }
-    else render();
+    await afterLogin();
+    return;
+  }
+  if(act==='send'||act==='resend'){
+    const email=(act==='resend'?emailPending:$('authEmail').value).trim().toLowerCase();
+    if(!/^\S+@\S+\.\S+$/.test(email)){ $('authErr').textContent='כתבו מייל תקין 🙂'; return; }
+    const ok=await sendCodeTo(email);
+    if(ok){ emailPending=email; $('authTo').textContent=email; $('authCode').value=''; showAuthView('code'); toast('שלחנו קוד למייל 📩'); }
+    return;
+  }
+  if(act==='verify'){
+    const code=$('authCode').value.replace(/\D/g,'');
+    if(code.length<6){ $('authErr').textContent='הקוד בן 6 ספרות'; return; }
+    $('authErr').textContent='בודקים...';
+    const ok=await verifyEmailCode(emailPending,code).catch(()=>false);
+    if(!ok){ $('authErr').textContent='הקוד לא נכון או שפג תוקפו'; return; }
+    $('authDlg').close(); $('authErr').textContent='';
+    toast(`נכנסתם, ${session.name} 👋`);
+    await afterLogin();
   }
 });
 

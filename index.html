@@ -32,6 +32,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .view-in{animation:viewIn .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+.bet{background:#fff7fb;border-radius:14px;padding:10px 12px;margin-top:10px;font-size:14px;color:var(--plum);line-height:1.6}
 .rc{flex:0 0 auto;background:var(--soft);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--plum);min-width:104px}
 .rc .re{font-size:22px;line-height:1.1}
 .rc small{color:var(--muted);font-size:11px}
@@ -538,7 +539,7 @@ const smellNames=['ריח של ורד','נסבל','חמוץ','סירחון','א�
 
 /* family challenges, computed from the log so they update by themselves */
 function challenges(){
-  const ent=db.log, ppl=realPeople();
+  const ent=db.log.filter(e=>!e.bet), ppl=realPeople();
   const wk=Date.now()-7*DAY;
   const weekN=sumWhere(e=>e.ts>=wk);
   const cats=new Set(ent.map(e=>e.cat)).size;
@@ -603,7 +604,7 @@ function viewHome(){
     </div>`:'';
   const ctas=(!tt?`<button class="dcta" data-act="goSettings" data-focus="meetDate">💘 הוסיפו תאריך היכרות ותתחילו לספור ימים</button>`:'')
     +(tt&&!st?`<button class="dcta soft" data-act="goSettings" data-focus="startDate">🏠 הוסיפו תאריך תחילת הבית</button>`:'');
-  const recent=db.log.slice(-5).reverse().map(e=>`<div class="rc"><span class="re">${catOf(e.cat).emoji}</span><b>${esc(person(e.who).name)}</b><small>${timeAgo(e.ts)}</small></div>`).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
+  const recent=db.log.filter(e=>!e.bet).slice(-5).reverse().map(e=>`<div class="rc"><span class="re">${catOf(e.cat).emoji}</span><b>${esc(person(e.who).name)}</b><small>${timeAgo(e.ts)}</small></div>`).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
   return `
   <section class="card counter">${ctas}
     <h1>כמה פלוצים שרדתם ביחד?</h1>
@@ -648,7 +649,7 @@ function entryHTML(e){
 }
 
 function viewLog(){
-  const items=db.log.slice().reverse().slice(0,120).map(e=>{
+  const items=db.log.filter(e=>!e.bet).slice().reverse().slice(0,120).map(e=>{
     const c=catOf(e.cat), p=person(e.who), sign=e.delta<0?'':'+';
     return `<div class="entry"><div class="emo">${c.emoji}</div><div style="flex:1">
       <div class="t">${esc(c.name)} <span class="muted">${sign}${e.delta}</span></div>
@@ -701,7 +702,10 @@ function viewGame(){
     <div class="muted">להשמעה בלבד. לא משנה את המונה.</div>
     <div class="pad">${pads}<button data-act="random"><span class="e">🎲</span>הפתעה</button></div>
     <button class="ghost" style="margin-top:12px;width:100%" data-act="stop">⏹ עצירה</button>
-    <button class="primary sm" style="margin-top:10px;width:100%" data-act="roulette">🎰 מי יפליץ הבא?</button></section>
+    <div class="bet">${(()=>{const b=openBet(), sc=betScore();
+      return `<div>${b?`ההימור הפתוח: על <b>${esc(person(b.who).name)}</b>. מי שיפליץ ראשון מכריע.`:'אין הימור פתוח כרגע.'}</div>
+      <div class="muted">ניחושים נכונים: ${sc.right} מתוך ${sc.total}</div>`;})()}</div>
+    <button class="primary sm" style="margin-top:10px;width:100%" data-act="bet">🎰 הימרו על הפלוץ הבא</button></section>
   <section class="card"><h2>🏆 אתגרים משפחתיים</h2>
     ${challenges().map(c=>{const done=c.cur>=c.goal, pct=Math.min(100,Math.round(c.cur/c.goal*100));
       return `<div class="ch ${done?'done':''}"><div class="chh"><span>${c.icon} ${c.name}</span><b>${done?'✅':Math.min(c.cur,c.goal)+'/'+c.goal}</b></div>
@@ -766,9 +770,31 @@ function filterTiles(q){
 
 /* ---------- actions ---------- */
 const newId=()=>'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+/* bets: a bet is a zero entry in the shared log. The next real fart settles it. */
+function openBet(){
+  for(let i=db.log.length-1;i>=0;i--){
+    const e=db.log[i];
+    if(e.bet) return e;
+    if(e.delta>0) return null;
+  }
+  return null;
+}
+function betScore(){
+  const r=db.log.filter(e=>e.betFor);
+  return {right:r.filter(e=>e.betHit).length,total:r.length};
+}
+function placeBet(pid){
+  const ev={id:newId(),ts:Date.now(),who:pid,cat:'bet',delta:0,bet:true};
+  db.log.push(ev); saveLocal(); sendEntry(ev); render();
+  toast(`ההימור נשמר על ${person(pid).name} 🎰`);
+}
 function addEntry(ev){
   const before={t:total(),p:pTotal(ev.who)};
+  const ob=ev.delta>0&&!ev.manual?openBet():null;
+  let settled=null;
+  if(ob){ ev.betFor=ob.who; ev.betHit=ob.who===ev.who; settled=ev; }
   db.log.push(ev); saveLocal(); sendEntry(ev);
+  if(settled) setTimeout(()=>toast(settled.betHit?`ניחשתם נכון! הפלוץ היה של ${person(settled.who).name} 🎯`:`פספסתם, הפלוץ היה של ${person(settled.who).name} 😅`,true),700);
   return {before,after:{t:total(),p:pTotal(ev.who)}};
 }
 function showAch(a){
@@ -790,15 +816,18 @@ function celebrate(before,after,pid,name){
 }
 $('achClose').onclick=()=>$('achDlg').close();
 
-let pickTile=null, pickCat=null;
+let pickTile=null, pickCat=null, pickMode='log';
+function pickList(ppl,title){
+  $('whoTitle').textContent=title;
+  $('whoList').innerHTML=ppl.map(p=>`<button class="pick" type="button" data-pick="${p.id}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}</button>`).join('');
+  $('whoDlg').showModal();
+}
 function openWhoPick(tileEl,cid){
   const ppl=realPeople();
   if(!ppl.length){ quickAdd(tileEl,cid); return; }
   const c=catOf(cid);
-  pickTile=tileEl; pickCat=cid;
-  $('whoTitle').textContent=`${c.emoji} ${c.name}: מי הפליץ?`;
-  $('whoList').innerHTML=ppl.map(p=>`<button class="pick" type="button" data-pick="${p.id}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}</button>`).join('');
-  $('whoDlg').showModal();
+  pickMode='log'; pickTile=tileEl; pickCat=cid;
+  pickList(ppl,`${c.emoji} ${c.name}: מי הפליץ?`);
 }
 function quickAdd(tileEl,cid,chosen){
   const pid=chosen||curWho();
@@ -940,11 +969,11 @@ document.addEventListener('click',e=>{
     if(act==='rmCat'){ db.cats=db.cats.filter(c=>c.id!==id); save(); render(); return; }
     if(act==='play'){ playPreset(PAD[+btn.dataset.i]); return; }
     if(act==='random'){ playRandom(); return; }
-    if(act==='roulette'){
+    if(act==='bet'){
       const ppl=realPeople();
       if(!ppl.length){ toast('קודם הוסיפו בני משפחה 👪'); return; }
-      const p=ppl[Math.floor(Math.random()*ppl.length)];
-      sfxTick(); buzz(20); toast(`הפלוץ הבא על ${p.name} 🎰`,true); return;
+      pickMode='bet'; pickTile=null;
+      pickList(ppl,'🎰 על מי ההימור לפלוץ הבא?'); return;
     }
     if(act==='stop'){ stopSound(); return; }
     if(act==='cmpWeek'){ window.__cmpWeek=btn.dataset.v==='1'; render(); return; }
@@ -961,6 +990,7 @@ document.addEventListener('click',e=>{
   const pk=e.target.closest('[data-pick]');
   if(pk){
     $('whoDlg').close();
+    if(pickMode==='bet'){ placeBet(pk.dataset.pick); return; }
     if(pickTile&&pickTile.isConnected) quickAdd(pickTile,pickCat,pk.dataset.pick);
     return;
   }

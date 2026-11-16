@@ -214,7 +214,7 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
     <div class="muted">שלחנו קוד ל־<b id="authTo"></b>. הקלידו אותו כאן:</div>
     <div class="field">הקוד<input id="authCode" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456"></div>
     <div class="row" style="justify-content:space-between;margin-top:10px"><button class="ghost" type="button" data-auth="back">חזרה</button><button class="primary sm" type="button" data-auth="verify">כניסה</button></div>
-    <button class="ghost" type="button" data-auth="send" style="margin-top:10px;width:100%">שלחו שוב</button>
+    <button class="ghost" type="button" id="authResend" data-auth="send" style="margin-top:10px;width:100%">שלחו שוב</button>
   </div>
   <div class="err" id="authErr"></div>
 </div></dialog>
@@ -886,7 +886,7 @@ async function rpc(name,body,retry=true){
 async function authCall(path,body){
   const r=await fetch(SB_URL+'/auth/v1/'+path,{method:'POST',headers:{apikey:SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
   let j=null; try{ j=await r.json(); }catch(e){}
-  return {ok:r.ok,j};
+  return {ok:r.ok,status:r.status,j};
 }
 function showAuthStep(n){
   $('authStep1').hidden=n!==1; $('authStep2').hidden=n!==2;
@@ -1056,6 +1056,23 @@ function roomSection(){
   </section>`;
 }
 
+/* resend cooldown: one code per minute, so the email is not sent again and again */
+let cooldownUntil=0, cooldownTimer=null;
+const COOLDOWN_SEC=60;
+function secondsLeft(){ return Math.max(0,Math.ceil((cooldownUntil-Date.now())/1000)); }
+function updateResend(){
+  const btn=$('authResend'); if(!btn) return;
+  const left=secondsLeft();
+  btn.disabled=left>0;
+  btn.textContent=left>0?`שלחו שוב בעוד ${left} שניות`:'שלחו שוב';
+  if(left<=0){ clearInterval(cooldownTimer); cooldownTimer=null; }
+}
+function startCooldown(sec){
+  cooldownUntil=Date.now()+sec*1000;
+  updateResend();
+  clearInterval(cooldownTimer); cooldownTimer=setInterval(updateResend,1000);
+}
+
 /* auth dialog: email, then the 6 digit code */
 document.addEventListener('click',async e=>{
   const a=e.target.closest('[data-auth]'); if(!a) return;
@@ -1067,9 +1084,12 @@ document.addEventListener('click',async e=>{
     const step2=!$('authStep2').hidden;
     const email=(step2?authEmail:$('authEmail').value).trim().toLowerCase();
     if(!/^\S+@\S+\.\S+$/.test(email)){ $('authErr').textContent='כתבו מייל תקין 🙂'; return; }
+    if(secondsLeft()>0){ $('authErr').textContent=`כבר שלחנו קוד. אפשר לשלוח שוב בעוד ${secondsLeft()} שניות`; return; }
     authEmail=email;
     $('authErr').textContent='שולחים...';
-    const r=await authCall('otp',{email,create_user:true}).catch(()=>({ok:false}));
+    const r=await authCall('otp',{email,create_user:true}).catch(()=>({ok:false,status:0}));
+    startCooldown(COOLDOWN_SEC);
+    if(r.status===429){ $('authErr').textContent='שלחנו כבר קוד לאחרונה. נסו שוב בעוד דקה, ובדקו גם בספאם'; if(step2) showAuthStep(2); else { $('authTo').textContent=email; showAuthStep(2); } return; }
     if(!r.ok){ $('authErr').textContent='לא הצלחנו לשלוח קוד, נסו שוב בעוד דקה'; return; }
     $('authTo').textContent=email; $('authCode').value=''; $('authErr').textContent='';
     showAuthStep(2); toast('שלחנו קוד למייל 📩');

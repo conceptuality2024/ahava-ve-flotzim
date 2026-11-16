@@ -203,6 +203,15 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
   <button class="primary" style="margin-top:14px" id="achClose">נהדר 🎉</button>
 </div></dialog>
 
+<dialog id="roomDlg" aria-labelledby="roomTitle"><div class="sheet">
+  <h3 id="roomTitle">👨‍👩‍👧 משחק משפחתי</h3>
+  <div class="muted">כדי שכולם ירשמו פלוצים מהטלפון שלהם, צריך משחק משותף.</div>
+  <button class="primary" style="margin-top:12px" data-room="create">צרו משחק חדש</button>
+  <div class="label">או הצטרפו עם קוד</div>
+  <div class="row"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
+  <button class="ghost" style="margin-top:12px;width:100%" data-room="later">אחר כך, אשחק לבד</button>
+</div></dialog>
+
 <div id="toasts" aria-live="polite"></div>
 <script>
 (() => {
@@ -304,7 +313,8 @@ function load(){
   return blank();
 }
 let db=load();
-const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(db)); }catch(e){} };
+function saveLocal(){ try{ localStorage.setItem(KEY,JSON.stringify(db)); }catch(e){} }
+const save=()=>{ saveLocal(); queuePush(); };
 
 const person=id=>db.people.find(p=>p.id===id)||db.people.find(p=>p.id==='none');
 const realPeople=()=>db.people.filter(p=>p.id!=='none');
@@ -599,6 +609,7 @@ function viewSettings(){
     <div class="field"><input id="newCat" type="text" maxlength="30" placeholder="למשל: בחדר של הכלב"></div>
     <button class="primary sm" data-act="addCat">הוספה ✨</button>
   </section>
+  ${roomSection()}
   <section class="card"><h2>📤 שיתוף</h2>
     <div class="muted">התחברות במייל או Google תגיע בהמשך. כרגע הנתונים נשמרים במכשיר הזה.</div>
     <div class="row" style="margin-top:8px"><a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('כמה פלוצים שרדנו ביחד? 💨 '+location.href)}" target="_blank" rel="noopener">💬 שתפו בוואטסאפ</a></div>
@@ -809,7 +820,146 @@ document.addEventListener('change',e=>{
   if(t.id==='cmpCat'){ window.__cmpCat=t.value; render(); }
 });
 
+/* ---------- family room (shared via Supabase) ---------- */
+const SB_URL='https://aygccuicmoyvxoxlcsvk.supabase.co';
+const SB_KEY='sb_publishable_CI5dy5mz41CQcyrq540XSw_SCzstuc3';
+const ROOM_KEY='ahava-room-code', ASKED_KEY='ahava-room-asked';
+const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+let room=null; try{ room=localStorage.getItem(ROOM_KEY)||null; }catch(e){}
+let lastStamp=null, pushTimer=null, pushing=false, dirty=false, pollTimer=null;
+
+async function rpc(name,body){
+  const r=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok) throw new Error(name+' '+r.status);
+  return r.json();
+}
+function normalize(d){
+  if(!d||!Array.isArray(d.log)||!Array.isArray(d.people)) return null;
+  d.cats=d.cats||[];
+  DEFAULT_CATS.forEach(([id,name,emoji])=>{
+    const c=d.cats.find(x=>x.id===id);
+    if(c){ if(!c.custom){ c.name=name; c.emoji=emoji; } } else d.cats.push({id,name,emoji});
+  });
+  if(!d.people.find(p=>p.id==='none')) d.people.push({id:'none',name:'ללא שיוך',gender:'',rel:'none',relName:'',emoji:'👀'});
+  return d;
+}
+function newCode(){
+  const a=new Uint32Array(6); crypto.getRandomValues(a);
+  let s=''; for(const x of a) s+=CODE_CHARS[x%CODE_CHARS.length];
+  return s;
+}
+function queuePush(){
+  if(!room) return;
+  dirty=true; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,400);
+}
+let warnedOffline=false;
+async function pushNow(){
+  if(!room||!dirty||pushing) return;
+  pushing=true; dirty=false;
+  try{
+    const ok=await rpc('room_save',{p_code:room,p_state:db});
+    if(ok){ lastStamp=null; warnedOffline=false; }
+  }catch(e){
+    dirty=true;
+    if(!warnedOffline){ toast('אין חיבור כרגע, נשמור כשיחזור ⏳'); warnedOffline=true; }
+  }
+  pushing=false;
+  if(dirty) pushTimer=setTimeout(pushNow,2000);
+}
+async function poll(){
+  if(!room||dirty||pushing||document.hidden) return;
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
+  try{
+    const rows=await rpc('room_get',{p_code:room});
+    const row=rows&&rows[0];
+    if(!row||row.updated_at===lastStamp||dirty||pushing) return;
+    const local=normalize(row.state);
+    lastStamp=row.updated_at;
+    if(local){ db=local; saveLocal(); render(); }
+  }catch(e){}
+}
+function startPoll(){ clearInterval(pollTimer); pollTimer=setInterval(poll,5000); }
+
+async function joinRoom(raw,silent){
+  const code=String(raw||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length<4){ if(!silent) toast('הקוד קצר מדי 🙃'); return false; }
+  try{
+    const rows=await rpc('room_get',{p_code:code});
+    const row=rows&&rows[0];
+    if(!row){ if(!silent) toast('לא מצאנו משחק עם הקוד הזה 🔍'); return false; }
+    const local=normalize(row.state);
+    if(!local){ if(!silent) toast('המשחק הזה לא תקין 😵'); return false; }
+    room=code; try{ localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1'); }catch(e){}
+    db=local; lastStamp=row.updated_at; dirty=false; saveLocal();
+    startPoll(); render();
+    if(!silent) toast('הצטרפתם למשחק 🎉');
+    return true;
+  }catch(e){
+    if(!silent) toast('אין חיבור כרגע, נסו שוב');
+    return false;
+  }
+}
+async function createRoom(){
+  try{
+    for(let i=0;i<5;i++){
+      const code=newCode();
+      const ok=await rpc('room_create',{p_code:code,p_state:db});
+      if(ok){
+        room=code; try{ localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1'); }catch(e){}
+        lastStamp=null; startPoll(); render();
+        toast('המשחק נוצר 🎉');
+        return true;
+      }
+    }
+  }catch(e){}
+  toast('לא הצלחנו ליצור משחק, נסו שוב');
+  return false;
+}
+function leaveRoom(){
+  if(!confirm('לצאת מהמשחק המשותף? הנתונים יישארו במכשיר הזה ובמשחק עצמו.')) return;
+  room=null; try{ localStorage.removeItem(ROOM_KEY); }catch(e){}
+  clearInterval(pollTimer); render(); toast('יצאתם מהמשחק');
+}
+function roomLink(){ return location.origin+location.pathname+'?room='+room; }
+function roomSection(){
+  if(room){
+    return `<section class="card"><h2>👨‍👩‍👧 המשחק המשותף</h2>
+      <div class="muted">כל מי שיש לו את הקוד יכול לרשום פלוצים ולראות את המשחק.</div>
+      <div style="font-size:24px;letter-spacing:4px;text-align:center;font-weight:900;color:var(--plum);margin:10px 0">${esc(room)}</div>
+      <div class="row"><button class="primary sm" data-room="copy">📋 העתקת קישור</button>
+      <a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('בואו לספור פלוצים ביחד 💨 '+roomLink())}" target="_blank" rel="noopener">💬 שליחה בוואטסאפ</a></div>
+      <div class="row" style="margin-top:10px"><button class="danger" data-room="leave">יציאה מהמשחק</button></div>
+    </section>`;
+  }
+  return `<section class="card"><h2>👨‍👩‍👧 משחק משפחתי</h2>
+    <div class="muted">צרו משחק משותף כדי שכולם ירשמו פלוצים מהטלפון שלהם.</div>
+    <div class="row" style="margin-top:8px"><button class="primary sm" data-room="create">צרו משחק חדש</button></div>
+    <div class="row" style="margin-top:10px"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
+  </section>`;
+}
+document.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-room]'); if(!b) return;
+  const act=b.dataset.room;
+  if(act==='create'){ if($('roomDlg').open) $('roomDlg').close(); await createRoom(); return; }
+  if(act==='join'){
+    const ok=await joinRoom($('joinCode').value,false);
+    if(ok&&$('roomDlg').open) $('roomDlg').close();
+    return;
+  }
+  if(act==='later'){ try{ localStorage.setItem(ASKED_KEY,'1'); }catch(err){} $('roomDlg').close(); return; }
+  if(act==='copy'){ try{ await navigator.clipboard.writeText(roomLink()); toast('הקישור הועתק 📋'); }catch(err){ toast('העתיקו את הקישור מהדפדפן'); } return; }
+  if(act==='leave'){ leaveRoom(); return; }
+});
+
 render();
+(async()=>{
+  const q=new URLSearchParams(location.search).get('room');
+  if(q){ await joinRoom(q,false); startPoll(); return; }
+  if(room){ await joinRoom(room,true); startPoll(); return; }
+  let asked=false; try{ asked=localStorage.getItem(ASKED_KEY)==='1'; }catch(e){}
+  if(!asked) $('roomDlg').showModal();
+})();
 })();
 </script>
 </body>

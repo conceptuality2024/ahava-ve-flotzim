@@ -530,6 +530,18 @@ function personCard(cid){
   return `<div class="muted" style="margin-top:8px">${next?`עוד <b>${next.n-n}</b> לפרס האישי ${next.icon} ${esc(next.name)} של ${esc(p.name)}`:`${esc(p.name)} כבר קטף את כל הפרסים האישיים 🏆`}</div>`;
 }
 
+/* categories ordered smartly: most used across the family first, then most recent, then the default order */
+function sortedCats(){
+  const stat={};
+  db.log.forEach((e,i)=>{
+    const s=stat[e.cat]||(stat[e.cat]={n:0,last:-1});
+    s.n+=e.delta||0; s.last=Math.max(s.last,i);
+  });
+  return db.cats
+    .map((c,i)=>({c,i,n:(stat[c.id]||{}).n||0,last:(stat[c.id]||{last:-1}).last}))
+    .sort((a,b)=>(b.n-a.n)||(b.last-a.last)||(a.i-b.i))
+    .map(x=>x.c);
+}
 function viewHome(){
   const t=total(), cid=curWho(), cur=person(cid);
   const tt=ymd(db.meet), st=ymd(db.start);
@@ -538,7 +550,7 @@ function viewHome(){
   const pct=nextP?Math.round((t-prevN)/(nextP.n-prevN)*100):100;
   const members=db.people.map(p=>`<button class="who ${p.id===cid?'on':''}" data-who="${p.id}" aria-pressed="${p.id===cid}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}<small>${pTotal(p.id)} 💨</small></button>`).join('')
     +(canEdit()?`<button class="who add" data-act="addPerson"><span class="av">➕</span>הוספה</button>`:'');
-  const tiles=db.cats.map(c=>`<div class="tile" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
+  const tiles=sortedCats().map(c=>`<div class="tile" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
       <span class="c">${cCount(cid,c.id)}</span>
       ${canEdit()?`<button class="edit" data-act="edit" data-cat="${c.id}" aria-label="קביעה ידנית">✏️</button>`:''}
       <span class="e">${c.emoji}</span><div class="n">${esc(c.name)}</div>

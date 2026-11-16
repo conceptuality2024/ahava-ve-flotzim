@@ -1,0 +1,816 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ff4f96">
+<meta name="description" content="כמה פלוצים שרדתם ביחד? עד שהריח יפריד בינינו.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="אהבה ופלוצים">
+<meta property="og:title" content="אהבה ופלוצים 💨 כמה פלוצים שרדתם ביחד?">
+<meta property="og:description" content="עד שהריח יפריד בינינו. רושמים, סופרים ומתחרים בבית.">
+<meta property="og:url" content="https://ahava-veplutzim.conceptuality.chatgpt.site/">
+<meta property="og:image" content="https://ahava-veplutzim.conceptuality.chatgpt.site/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:locale" content="he_IL">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="אהבה ופלוצים 💨">
+<meta name="twitter:description" content="כמה פלוצים שרדתם ביחד? עד שהריח יפריד בינינו.">
+<meta name="twitter:image" content="https://ahava-veplutzim.conceptuality.chatgpt.site/og.png">
+<title>אהבה ופלוצים 💗💨</title>
+<style>
+:root{--pink:#ff4f96;--pink2:#ff8ab8;--soft:#ffe1ef;--lilac:#efe3ff;--peach:#ffe6d5;--mint:#d9f7ec;--plum:#7a1f4b;--ink:#2b1322;--muted:#8a6276;--gold:#f7b733;--shadow:0 10px 26px rgba(122,31,75,.13);--r:22px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 0%,#fff6fb,transparent 40%),linear-gradient(170deg,#ffeaf4,#ffd0e6 55%,#f7b5d4);min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom,0px));-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.wrap{max-width:480px;margin:0 auto;padding:14px 14px 24px}
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:900;font-size:21px;color:var(--plum)}
+.ibtn{background:#fff;border-radius:14px;padding:8px 11px;box-shadow:var(--shadow);font-size:18px;transition:transform .15s}
+.ibtn:active{transform:scale(.9) rotate(-8deg)}
+.card{background:rgba(255,255,255,.95);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-top:14px;position:relative}
+.card h2{margin:0 0 8px;font-size:17px;color:var(--plum)}
+.muted{color:var(--muted);font-size:13px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:6px 2px 10px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.who{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 12px;border-radius:20px;background:#fff;box-shadow:var(--shadow);font-size:13px;font-weight:700;min-width:86px;transition:transform .2s,background .2s}
+.who .av{font-size:30px;line-height:1}
+.who small{font-size:11px;opacity:.8;font-weight:600}
+.who.on{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;transform:translateY(-3px) scale(1.04)}
+.who.add{background:var(--mint);color:#0d5a45}
+.counter{text-align:center;padding:20px 14px 16px;position:relative;overflow:hidden}
+.counter::after{content:"";position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(closest-side,#ffd3e6,transparent);top:-120px;left:50%;transform:translateX(-50%);z-index:0}
+.counter>*{position:relative;z-index:1}
+.counter h1{margin:0 0 2px;font-size:22px;color:var(--plum)}
+.counter .sub{margin:0 0 10px;color:var(--muted);font-size:13px}
+.bignum{display:inline-block;background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-radius:26px;padding:10px 26px 12px;box-shadow:0 10px 24px rgba(255,79,150,.35);animation:float 3.2s ease-in-out infinite}
+.bignum b{display:block;font-size:60px;line-height:1;font-variant-numeric:tabular-nums}
+.bignum span{font-size:14px}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.bump{animation:bump .45s cubic-bezier(.3,1.6,.5,1)}
+@keyframes bump{0%{transform:scale(.9)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+.dates{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;font-size:12.5px}
+.dates>div{background:var(--peach);border-radius:14px;padding:8px;color:var(--plum);line-height:1.5}
+.dates b{color:var(--ink)}
+.search{width:100%;border:2px solid var(--soft);border-radius:16px;padding:10px 14px;font-size:15px;background:#fff;margin-top:10px}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tile{position:relative;background:#fff;border-radius:20px;padding:14px 10px 12px;box-shadow:var(--shadow);text-align:center;transition:transform .12s;user-select:none;touch-action:manipulation;cursor:pointer}
+.tile:active{transform:scale(.95)}
+.tile .e{font-size:30px;line-height:1.1;display:block}
+.tile .n{font-size:13px;font-weight:800;margin-top:4px;line-height:1.25}
+.tile .c{position:absolute;top:8px;left:8px;background:var(--pink);color:#fff;font-weight:900;border-radius:99px;min-width:28px;padding:2px 8px;font-size:13px;font-variant-numeric:tabular-nums}
+.tile .edit{position:absolute;top:6px;right:6px;font-size:13px;opacity:.5;padding:4px}
+.tile .star{position:absolute;bottom:6px;right:8px;font-size:13px;opacity:.55;padding:4px}
+.tile.wob{animation:wob .4s}
+@keyframes wob{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+.primary{width:100%;padding:15px;border-radius:20px;font-size:18px;font-weight:900;color:#fff;background:linear-gradient(135deg,var(--pink),#ff7ab0);box-shadow:0 10px 22px rgba(255,79,150,.35);transition:transform .15s}
+.primary:active{transform:scale(.96)}
+.primary.sm{width:auto;padding:11px 20px;font-size:16px}
+.ghost{background:#fff;color:var(--plum);border:2px solid var(--soft);border-radius:14px;padding:9px 13px;font-weight:700}
+.ghost.on{background:var(--pink);color:#fff;border-color:var(--pink)}
+.danger{background:#fff;color:#c0264f;border:2px solid #ffc2d6;border-radius:14px;padding:9px 13px;font-weight:700}
+.chip{background:var(--soft);color:var(--plum);border-radius:99px;padding:7px 12px;font-size:14px;display:inline-flex;align-items:center;gap:6px;font-weight:700}
+.chip.on{background:var(--pink);color:#fff}
+.bar{height:14px;background:var(--soft);border-radius:99px;overflow:hidden;margin:10px 0 6px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#ff9b3d,var(--pink));background-size:200% 100%;border-radius:99px;transition:width 1s cubic-bezier(.2,.8,.2,1);animation:shine 2.4s linear infinite}
+@keyframes shine{from{background-position:0 0}to{background-position:200% 0}}
+.ms{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.ms div{border-radius:14px;padding:7px 3px;background:#f6f1f4;color:#a38c98;font-size:11.5px;text-align:center}
+.ms b{display:block;font-size:15px}
+.ms .won{background:linear-gradient(135deg,#fff3c4,#ffd36b);color:#6b4a00}
+.ms .next{background:#fff;color:var(--plum);outline:2px dashed var(--pink);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.entry{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px dashed #f3bcd6}
+.entry:first-child{border-top:0}
+.emo{font-size:24px;line-height:1.1;flex:0 0 auto}
+.entry .t{font-weight:800;font-size:15px}
+.entry .m{font-size:12.5px;color:var(--muted)}
+.entry .s{font-size:13px;margin-top:3px}
+.entry .x{margin-inline-start:auto;font-size:14px;opacity:.5;padding:4px}
+.pad{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:8px}
+.pad button{background:#fff;border-radius:20px;padding:14px 4px;box-shadow:var(--shadow);font-weight:800;font-size:13px;color:var(--plum);transition:transform .1s}
+.pad button:active{transform:scale(.92) rotate(-3deg)}
+.pad .e{display:block;font-size:26px;margin-bottom:4px}
+.lb{margin-top:8px}
+.lbr{display:grid;grid-template-columns:28px 1fr 44px;gap:8px;align-items:center;font-size:14px;margin-top:8px;font-weight:700}
+.lbr .tr{height:12px;background:var(--soft);border-radius:99px;overflow:hidden}
+.lbr .tr i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pink),var(--gold));border-radius:99px;transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.lbr b{text-align:left;font-variant-numeric:tabular-nums}
+.crown{animation:float 2s ease-in-out infinite;display:inline-block}
+.nav{position:fixed;bottom:0;left:0;right:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid #f7cfe2;display:flex;justify-content:space-around;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));z-index:5}
+.nav button{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--muted);padding:6px 10px;border-radius:16px;min-width:66px;transition:background .2s}
+.nav button .i{font-size:21px;transition:transform .2s}
+.nav button.on{color:var(--plum);font-weight:800;background:var(--soft)}
+.nav button.on .i{transform:scale(1.2)}
+.field{display:flex;flex-direction:column;gap:6px;margin:10px 0;font-size:14px;font-weight:700;color:var(--plum)}
+.field input{border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff;color:var(--ink);font-weight:400;width:100%}
+dialog{border:0;border-radius:28px;padding:0;width:min(440px,94vw);box-shadow:0 30px 60px rgba(60,10,35,.35);color:var(--ink);animation:pop .3s cubic-bezier(.3,1.4,.5,1)}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:none;opacity:1}}
+dialog::backdrop{background:rgba(60,10,35,.45)}
+.sheet{padding:18px;max-height:86vh;overflow:auto}
+.sheet h3{margin:0 0 6px;color:var(--plum);font-size:20px}
+.sheet .label{font-weight:800;font-size:14px;margin:14px 0 6px;color:var(--plum)}
+.sh{display:flex;justify-content:space-between;font-size:14px;font-weight:700}
+input[type=range]{width:100%;accent-color:var(--pink)}
+textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-radius:14px;padding:11px;font-size:15px;background:#fff;resize:none}
+.toggle{display:flex;align-items:center;gap:10px;background:#fff7fb;border-radius:14px;padding:12px;margin-top:12px;font-weight:700;cursor:pointer}
+.toggle input{width:22px;height:22px;accent-color:var(--gold)}
+.err{color:#c0264f;font-size:13px;min-height:18px;margin:6px 0}
+.ach{text-align:center;padding:26px 18px}
+.ach .big{font-size:64px;animation:spin 1.2s cubic-bezier(.3,1.5,.5,1)}
+@keyframes spin{from{transform:rotate(-200deg) scale(.2)}to{transform:none}}
+.ideas{background:var(--peach);border-radius:16px;padding:12px;margin-top:12px;font-size:14px}
+#toasts{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:30;display:flex;flex-direction:column;gap:8px;width:min(92vw,420px);pointer-events:none}
+.toast{background:var(--plum);color:#fff;padding:12px 16px;border-radius:18px;box-shadow:var(--shadow);font-weight:800;text-align:center;animation:tin .4s cubic-bezier(.3,1.5,.5,1)}
+.toast.gold{background:linear-gradient(135deg,#ffd36b,#f7b733);color:#4a2e00}
+@keyframes tin{from{transform:translateY(-18px) scale(.8);opacity:0}to{transform:none;opacity:1}}
+.fx{position:fixed;z-index:40;pointer-events:none;font-size:22px;will-change:transform,opacity}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand">אהבה ופלוצים 💗💨</div>
+    <div class="row" style="gap:6px">
+      <button class="ibtn" id="muteBtn" aria-label="צלילים">🔊</button>
+      <button class="ibtn" id="gearBtn" aria-label="הגדרות">⚙️</button>
+    </div>
+  </div>
+  <main id="view"></main>
+</div>
+
+<nav class="nav" aria-label="ניווט ראשי">
+  <button data-tab="home"><span class="i">🏠</span>בית</button>
+  <button data-tab="log"><span class="i">📜</span>יומן</button>
+  <button data-tab="legends"><span class="i">🌟</span>אגדות</button>
+  <button data-tab="game"><span class="i">🎛️</span>משחק</button>
+</nav>
+
+<dialog id="dlg" aria-labelledby="dlgTitle">
+  <div class="sheet">
+    <h3 id="dlgTitle">🌬️ רישום מפורט</h3>
+    <div class="label">סוג הפלוץ</div>
+    <div class="row" id="fCats"></div>
+    <div class="label">מי הפליץ?</div>
+    <div class="row" id="fWho"></div>
+    <div class="label">רמת רעש</div>
+    <div class="sh"><span id="noiseLbl"></span><span id="noiseVal">2</span></div>
+    <input type="range" id="noise" min="0" max="5" value="2" aria-label="רמת רעש">
+    <div class="label">רמת סירחון</div>
+    <div class="sh"><span id="smellLbl"></span><span id="smellVal">2</span></div>
+    <input type="range" id="smell" min="0" max="5" value="2" aria-label="רמת סירחון">
+    <div class="label">הסיפור (לא חובה)</div>
+    <textarea id="story" rows="2" maxlength="160" placeholder="מה קרה שם?"></textarea>
+    <label class="toggle"><input type="checkbox" id="legend"><span>👑 שמרו כפלוץ אגדי (נכנס להיכל, מחייב סיפור)</span></label>
+    <div class="err" id="err"></div>
+    <div class="row" style="justify-content:space-between;margin-top:8px">
+      <button class="ghost" type="button" id="cancel">ביטול</button>
+      <button class="primary sm" type="button" id="save">שמרו 💨</button>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="mDlg" aria-labelledby="mTitle">
+  <div class="sheet">
+    <h3 id="mTitle">👋 הוספת בן משפחה</h3>
+    <div class="field">שם או כינוי<input id="mName" type="text" maxlength="20" placeholder="למשל: רומי, מיקי, פישי"></div>
+    <div class="label">מין</div>
+    <div class="row" id="mGender"></div>
+    <div class="label">סטטוס</div>
+    <div class="row" id="mRel"></div>
+    <div class="field" id="mCustomWrap" hidden>שם הסטטוס המותאם<input id="mCustom" type="text" maxlength="20" placeholder="למשל: שכן, חברה טובה, דודה"></div>
+    <div class="label">אמוג׳י</div>
+    <div class="row" id="mEmoji"></div>
+    <div class="row" style="justify-content:space-between;margin-top:14px">
+      <button class="ghost" type="button" id="mCancel">ביטול</button>
+      <button class="primary sm" type="button" id="mSave">שמרו 👍</button>
+    </div>
+    <div class="err" id="mErr"></div>
+  </div>
+</dialog>
+
+<dialog id="achDlg"><div class="ach">
+  <div class="big" id="achIcon">🏆</div>
+  <h3 id="achTitle" style="color:var(--plum);margin:8px 0 2px"></h3>
+  <div class="muted" id="achSub"></div>
+  <div class="ideas" id="achIdeas"></div>
+  <button class="primary" style="margin-top:14px" id="achClose">נהדר 🎉</button>
+</div></dialog>
+
+<div id="toasts" aria-live="polite"></div>
+<script>
+(() => {
+'use strict';
+const KEY='ahava-veplutzim-v5', OLD='ahava-veplutzim-v4';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DAY=86400000;
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const REL=[
+  {k:'partner',l:'בן זוג',e:'🧔'},{k:'partnerF',l:'בת זוג',e:'👩'},
+  {k:'child',l:'ילד',e:'🧒'},{k:'childF',l:'ילדה',e:'👧'},
+  {k:'dog',l:'כלב',e:'🐶'},{k:'dogF',l:'כלבה',e:'🐕'},
+  {k:'cat',l:'חתול',e:'🐱'},{k:'catF',l:'חתולה',e:'🐈'},
+  {k:'custom',l:'אחר',e:'✨'}
+];
+const GENDERS=['זכר','נקבה','אחר'];
+const EMOJIS=['😎','🤪','🥳','🦄','🐸','🐷','🦖','👑','🧸','🐰','🦊','🐼'];
+
+const DEFAULT_CATS=[
+  ['c0','פלוץ במעלית','🛗'],['c1','פלוץ בירידה','⬇️'],['c2','פלוץ על הספה','🛋️'],['c3','פלוץ לפני קקי','💩'],['c4','פלוץ מתחת לשמיכה','🛏️'],
+  ['c5','פלוץ בכביסה','🧺'],['c6','פלוץ במקלחת','🚿'],['c7','פלוץ בשטיפת כלים','🍽️'],['c8','פלוץ של הילדים','🧒'],['c9','פלוץ של החתולים','🐱'],
+  ['c10','פלוץ של הכלבים','🐶'],['c11','פלוץ פות','🍑'],['c12','פלוץ ביצים','🥚'],['c13','פלוץ של שבת','🕯️'],['c14','הפלוץ שהאשמתם בו את הצד השני','👀'],
+  ['c15','פלוץ בזמן סרט','🎬'],['c16','פלוץ בפגישת זום','💻'],['c17','פלוץ בנסיעה ברכב','🚗'],['c18','פלוץ במסעדה','🍝'],['c19','פלוץ בחדר המדרגות','🪜'],
+  ['c20','פלוץ בתור בסופר','🛒'],['c21','פלוץ בשירותים','🚽'],['c22','פלוץ במסיבה','🎉'],['c23','פלוץ בטיול משפחתי','🏕️'],['c24','פלוץ בזמן מדיטציה','🧘'],
+  ['c25','פלוץ בשינה','😴'],['c26','פלוץ בחלום','💭'],['c27','פלוץ עם הקפה של הבוקר','☕'],['c28','פלוץ בחדר הכושר','🏋️'],['c29','פלוץ באוטובוס','🚌'],
+  ['c30','פלוץ ברכבת','🚆'],['c31','פלוץ בטיסה','✈️'],['c32','פלוץ בחתונה','💒'],['c33','פלוץ בקונצרט','🎤'],['c34','פלוץ בתיאטרון','🎭'],
+  ['c35','פלוץ במיטה','🛌'],['c36','פלוץ מתחת לשולחן','🍽️'],['c37','פלוץ בארוחת שבת','🍗'],['c38','פלוץ בארוחת ערב','🥘'],['c39','פלוץ בעבודה','💼'],
+  ['c40','פלוץ בפגישה עם הבוס','👔'],['c41','פלוץ בשיעור יוגה','🧘‍♀️'],['c42','פלוץ כשמנסים להירדם','🌙'],['c43','פלוץ בחנייה','🅿️'],['c44','פלוץ במעלית עם שכנים','🏢'],
+  ['c45','פלוץ בתמונה משפחתית','📸'],['c46','פלוץ באמצע נשיקה','💋'],['c47','פלוץ ביום הולדת','🎂'],['c48','פלוץ ליד התינוק','👶'],['c49','פלוץ בביקור אצל ההורים','👵'],
+  ['c50','פלוץ במטבח','🍳'],['c51','פלוץ בחוף הים','🏖️'],['c52','פלוץ במדורה','🔥'],['c53','פלוץ באוהל','⛺'],['c54','פלוץ באימון ריצה','🏃'],
+  ['c55','פלוץ בגינה','🌷'],['c56','פלוץ בקניון','🛍️'],['c57','פלוץ בקופת חולים','🏥'],['c58','פלוץ בגן המשחקים','🛝'],['c59','פלוץ בתור לקופה','🧾'],
+  ['c60','פלוץ בזמן התנצלות','🙇'],['c61','פלוץ שנשמע כמו מילה','🗣️'],['c62','פלוץ אחרי כוס יין','🍷'],['c63','פלוץ בתוך הפתעה','🎁'],['c64','פלוץ ליד הכלב שהאשמנו','🐾']
+];
+const PRIZES=[
+  {n:10,icon:'🌬️',name:'רוח ראשונה',ideas:'נותנים כיף וצועקים "שרדנו!"'},
+  {n:25,icon:'💞',name:'זוג עם אוויר',ideas:'בוחרים שיר ורוקדים 25 שניות'},
+  {n:50,icon:'🏅',name:'אלופי הספה',ideas:'פותחים חטיף וצופים בפרק אהוב'},
+  {n:100,icon:'👑',name:'מסדר השמיכה',ideas:'מכתירים את הפלוץ האגדי של המשפחה'},
+  {n:150,icon:'📢',name:'מוסד הרעש',ideas:'מקשיבים לכל הקטעים הרועשים ביחד'},
+  {n:200,icon:'🦄',name:'אגדה חיה',ideas:'בוחרים שם רשמי לחיה שהאשמנו'},
+  {n:250,icon:'🎉',name:'משפחה עם נוכחות',ideas:'מכינים גביע מנייר ועורכים טקס בסלון'},
+  {n:300,icon:'🏛️',name:'היכל הפלוצים',ideas:'מציירים את ההיכל על קיר בבית'},
+  {n:500,icon:'💩',name:'אגדת ריח',ideas:'מכינים תעודת הישג למקרר'},
+  {n:1000,icon:'🐉',name:'המלך השמיני',ideas:'יוצאים לערב מיוחד, והפעם בלי פלוצים'}
+];
+const PERSON_PRIZES=[
+  {n:5,icon:'🎈',name:'חימום'},{n:10,icon:'🌬️',name:'רוח ראשונה'},{n:25,icon:'💞',name:'אוויר של אלוף'},
+  {n:50,icon:'🏅',name:'אלוף הספה'},{n:100,icon:'👑',name:'מלך השמיכה'},{n:250,icon:'🐉',name:'אגדה אישית'}
+];
+
+/* sound presets, only farts */
+const PAD=[
+  {k:'short',l:'קצר',e:'💨',o:{d:.35,f0:150,f1:70,lp:500,pe:.6}},
+  {k:'long',l:'ארוך',e:'🌬️',o:{d:1.8,f0:110,f1:45,lp:380,pe:.6}},
+  {k:'weak',l:'חלש',e:'🫧',o:{d:.5,f0:90,f1:60,lp:260,pe:.25}},
+  {k:'burst',l:'מתפרץ',e:'💥',o:{d:.22,f0:200,f1:60,lp:700,pe:.95}},
+  {k:'double',l:'שניים ברצף',e:'👯',multi:[{at:0,d:.3,f0:140,f1:70,lp:450,pe:.6},{at:.4,d:.3,f0:160,f1:80,lp:450,pe:.6}]},
+  {k:'frog',l:'צפרדע',e:'🐸',o:{d:.5,f0:220,f1:90,type:'square',lp:900,wob:40,pe:.5}},
+  {k:'trombone',l:'טרומבון',e:'🎺',o:{d:1.2,f0:260,f1:95,lp:600,wob:6,wobAmt:60,pe:.7}},
+  {k:'squeak',l:'צפצוף',e:'🐭',o:{d:.4,f0:500,f1:260,type:'triangle',lp:2200,wob:60,pe:.5}},
+  {k:'deep',l:'עמוק',e:'🐘',o:{d:1,f0:60,f1:30,lp:200,pe:.8}},
+  {k:'wet',l:'רטוב',e:'💦',o:{d:.8,f0:120,f1:55,lp:420,crackle:true,pe:.6}},
+  {k:'shake',l:'שקשוק',e:'🫨',multi:[0,.12,.26,.38,.5].map((at,i)=>({at,d:.12,f0:180+i*25,f1:90,lp:700,pe:.8}))},
+  {k:'echo',l:'הד',e:'🌀',o:{d:.5,f0:130,f1:60,lp:400,echo:true,pe:.6}}
+];
+
+function blank(){
+  return {start:'',meet:'',base:0,muted:false,
+    people:[{id:'none',name:'ללא שיוך',gender:'',rel:'none',relName:'',emoji:'👀'}],
+    cats:DEFAULT_CATS.map(([id,name,emoji])=>({id,name,emoji})),
+    log:[]};
+}
+function load(){
+  try{
+    let d=JSON.parse(localStorage.getItem(KEY));
+    if(!d){
+      const o=JSON.parse(localStorage.getItem(OLD));
+      if(o&&Array.isArray(o.log)){
+        d=blank();
+        d.start=o.start||''; d.meet=o.meet||''; d.base=o.base||0; d.muted=!!o.muted;
+        if(Array.isArray(o.people)) d.people=o.people.map(p=>({relName:'',...p}));
+        if(Array.isArray(o.cats)) d.cats=o.cats;
+        d.log=o.log.map(e=>({...e,delta:e.delta??1}));
+      }
+    }
+    if(d&&Array.isArray(d.log)&&Array.isArray(d.people)){
+      d.cats=d.cats||[];
+      DEFAULT_CATS.forEach(([id,name,emoji])=>{
+        const c=d.cats.find(x=>x.id===id);
+        if(c){ if(!c.custom){ c.name=name; c.emoji=emoji; } }
+        else d.cats.push({id,name,emoji});
+      });
+      if(!d.people.find(p=>p.id==='none')) d.people.push({id:'none',name:'ללא שיוך',gender:'',rel:'none',relName:'',emoji:'👀'});
+      return d;
+    }
+  }catch(e){}
+  return blank();
+}
+let db=load();
+const save=()=>{ try{ localStorage.setItem(KEY,JSON.stringify(db)); }catch(e){} };
+
+const person=id=>db.people.find(p=>p.id===id)||db.people.find(p=>p.id==='none');
+const realPeople=()=>db.people.filter(p=>p.id!=='none');
+const catOf=id=>db.cats.find(c=>c.id===id)||{name:'פלוץ',emoji:'💨'};
+const sumWhere=f=>db.log.reduce((a,e)=>a+(f(e)?e.delta:0),0);
+const total=()=>(+db.base||0)+sumWhere(()=>true);
+const pTotal=pid=>sumWhere(e=>e.who===pid);
+const cCount=(pid,cid)=>sumWhere(e=>e.who===pid&&e.cat===cid);
+const avatar=p=>p.emoji||(REL.find(r=>r.k===p.rel)||{e:'👤'}).e;
+const relLabel=p=>p.rel==='custom'?(p.relName||'אחר'):((REL.find(r=>r.k===p.rel)||{l:''}).l);
+const fmtDate=ts=>new Date(ts).toLocaleDateString('he-IL',{day:'numeric',month:'numeric',year:'numeric'});
+const stars=n=>'★'.repeat(n)+'☆'.repeat(5-n);
+const plural=(n,one,many)=>n===1?one:`${n} ${many}`;
+let who=null;
+const curWho=()=>{ if(!db.people.some(p=>p.id===who)) who=(realPeople()[0]||db.people[0]).id; return who; };
+
+function ymd(from){
+  if(!from) return null;
+  const now=new Date(), s=new Date(from);
+  let y=now.getFullYear()-s.getFullYear(), m=now.getMonth()-s.getMonth(), d=now.getDate()-s.getDate();
+  if(d<0){ m--; d+=new Date(now.getFullYear(),now.getMonth(),0).getDate(); }
+  if(m<0){ y--; m+=12; }
+  return {y:Math.max(0,y), m:Math.max(0,m), d:Math.max(0,d), days:Math.max(0,Math.floor((now-s)/DAY))};
+}
+const dateText=o=>[o.y?plural(o.y,'שנה','שנים'):'', o.m?plural(o.m,'חודש','חודשים'):'', o.d?plural(o.d,'יום','ימים'):''].filter(Boolean).join(' · ') || 'היום';
+
+/* ---------- sound ---------- */
+let ac=null;
+const ctxA=()=>{ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); return ac; };
+function noiseBuf(c,d){
+  const len=Math.max(1,Math.floor(c.sampleRate*d)), b=c.createBuffer(1,len,c.sampleRate), ch=b.getChannelData(0);
+  for(let i=0;i<len;i++) ch[i]=(Math.random()*2-1)*(1-i/len);
+  return b;
+}
+function blast(o={}, at=0){
+  const c=ctxA(), t0=c.currentTime+at+.02, d=o.d||.6;
+  const osc=c.createOscillator(); osc.type=o.type||'sawtooth';
+  const f0=o.f0*(0.9+Math.random()*0.2), f1=o.f1*(0.9+Math.random()*0.2);
+  osc.frequency.setValueAtTime(f0,t0); osc.frequency.exponentialRampToValueAtTime(f1,t0+d);
+  const lfo=c.createOscillator(), lg=c.createGain();
+  lfo.frequency.value=o.wob||(18+Math.random()*30); lg.gain.value=o.wobAmt??35;
+  lfo.connect(lg); lg.connect(osc.frequency);
+  const f=c.createBiquadFilter(); f.type='lowpass'; f.frequency.value=o.lp||400; f.Q.value=o.q||4;
+  const g=c.createGain(), pk=o.pe||.6;
+  g.gain.setValueAtTime(.0001,t0); g.gain.exponentialRampToValueAtTime(pk,t0+.05);
+  g.gain.setValueAtTime(pk*.85,t0+d*.6); g.gain.exponentialRampToValueAtTime(.0001,t0+d);
+  osc.connect(f); f.connect(g);
+  if(o.crackle){
+    const n=c.createBufferSource(); n.buffer=noiseBuf(c,d);
+    const bp=c.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=1200; bp.Q.value=1.2;
+    const ng=c.createGain(); ng.gain.value=.35;
+    n.connect(bp); bp.connect(ng); ng.connect(g); n.start(t0); n.stop(t0+d);
+  }
+  g.connect(c.destination);
+  if(o.echo){
+    const dl=c.createDelay(); dl.delayTime.value=.2; const fb=c.createGain(); fb.gain.value=.35;
+    g.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(c.destination);
+  }
+  osc.start(t0); lfo.start(t0); osc.stop(t0+d+.1); lfo.stop(t0+d+.1);
+}
+function playPreset(p){
+  if(db.muted) return;
+  if(p.multi) return p.multi.forEach(m=>blast(m,m.at));
+  blast(p.o);
+}
+function playRandom(){
+  const pool=PAD;
+  playPreset(pool[Math.floor(Math.random()*pool.length)]);
+}
+const sfxFart=()=>{ if(!db.muted) playPreset(PAD[Math.floor(Math.random()*4)]); };
+const sfxDing=()=>{
+  if(db.muted) return;
+  const c=ctxA(); let t=c.currentTime;
+  [[880,.12],[1320,.12],[1760,.35]].forEach(([f,d])=>{
+    const o=c.createOscillator(), g=c.createGain();
+    o.type='sine'; o.frequency.value=f;
+    g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.2,t+.02); g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+d+.02); t+=d*.9;
+  });
+}
+function stopSound(){
+  if(ac){ try{ ac.close(); }catch(e){} ac=null; }
+}
+
+/* ---------- effects ---------- */
+function fx(el,frames,opts){ if(reduce){ el.remove(); return; } const a=el.animate(frames,opts); a.onfinish=()=>el.remove(); }
+function cloud(x,y){
+  if(reduce) return;
+  const n=6;
+  for(let i=0;i<n;i++){
+    const el=document.createElement('span'); el.className='fx'; el.textContent=i%3===2?'☁️':'💨';
+    el.style.left=x+'px'; el.style.top=y+'px'; document.body.appendChild(el);
+    const a=(i/n)*Math.PI*2+Math.random()*.5, r=40+Math.random()*40;
+    fx(el,[
+      {transform:'translate(-50%,-50%) scale(.4)',opacity:1},
+      {transform:`translate(calc(-50% + ${Math.cos(a)*r}px),calc(-50% + ${Math.sin(a)*r-30}px)) scale(1.3)`,opacity:.9,offset:.6},
+      {transform:`translate(calc(-50% + ${Math.cos(a)*r*1.4}px),calc(-50% + ${Math.sin(a)*r-80}px)) scale(1.8)`,opacity:0}
+    ],{duration:800+Math.random()*300,easing:'cubic-bezier(.2,.7,.4,1)'});
+  }
+}
+function confetti(list=['💗','💨','✨','💩','🌟']){
+  if(reduce) return;
+  for(let i=0;i<26;i++){
+    const el=document.createElement('span'); el.className='fx';
+    el.textContent=list[Math.floor(Math.random()*list.length)];
+    el.style.left=(6+Math.random()*88)+'vw'; el.style.top='45vh';
+    document.body.appendChild(el);
+    const dx=(Math.random()-.5)*200, dy=-(140+Math.random()*220), rot=(Math.random()-.5)*720;
+    fx(el,[
+      {transform:'translate(0,0) rotate(0) scale(.6)',opacity:1},
+      {transform:`translate(${dx}px,${dy}px) rotate(${rot/2}deg) scale(1.1)`,opacity:1,offset:.4},
+      {transform:`translate(${dx*1.3}px,${dy+340}px) rotate(${rot}deg) scale(.9)`,opacity:0}
+    ],{duration:1500+Math.random()*800,easing:'cubic-bezier(.2,.7,.4,1)'});
+  }
+}
+function floatText(x,y,text){
+  if(reduce) return;
+  const el=document.createElement('span'); el.className='fx'; el.textContent=text;
+  el.style.fontWeight='900'; el.style.color='#7a1f4b'; el.style.left=x+'px'; el.style.top=y+'px';
+  document.body.appendChild(el);
+  fx(el,[{transform:'translate(-50%,0)',opacity:1},{transform:'translate(-50%,-70px) scale(1.2)',opacity:0}],{duration:900,easing:'ease-out'});
+}
+function toast(text,gold=false){
+  const el=document.createElement('div'); el.className='toast'+(gold?' gold':''); el.textContent=text;
+  $('toasts').appendChild(el);
+  setTimeout(()=>{
+    if(reduce) return el.remove();
+    el.animate([{opacity:1},{opacity:0,transform:'translateY(-10px)'}],{duration:350,fill:'forwards'}).onfinish=()=>el.remove();
+  },2200);
+}
+function countUp(el,to){
+  const from=Number(el.dataset.v||0); el.dataset.v=to;
+  if(reduce||from===to){ el.textContent=to; return; }
+  const t0=performance.now();
+  (function step(now){
+    const p=Math.min(1,(now-t0)/800), e=1-Math.pow(1-p,3);
+    el.textContent=Math.round(from+(to-from)*e);
+    if(p<1) requestAnimationFrame(step);
+  })(t0);
+}
+function buzz(ms){ try{ navigator.vibrate&&navigator.vibrate(ms); }catch(e){} }
+
+/* ---------- state and views ---------- */
+let tab='home';
+const noiseNames=['שקט כמו מלאך','לחישה','בינוני','רועש','מלחמה'];
+const smellNames=['ריח של ורד','נסבל','חמוץ','סירחון','אפוקליפסה'];
+
+function standings(cid,week){
+  const from=week?Date.now()-7*DAY:0, m={};
+  db.log.forEach(e=>{
+    if(e.ts<from) return;
+    if(cid!=='all'&&e.cat!==cid) return;
+    m[e.who]=(m[e.who]||0)+e.delta;
+  });
+  return realPeople().map(p=>({p,n:m[p.id]||0})).sort((a,b)=>b.n-a.n);
+}
+
+function personCard(cid){
+  const p=person(cid);
+  const n=pTotal(cid);
+  const next=PERSON_PRIZES.find(x=>x.n>n);
+  return `<div class="muted" style="margin-top:8px">${next?`עוד <b>${next.n-n}</b> לפרס האישי ${next.icon} ${esc(next.name)} של ${esc(p.name)}`:`${esc(p.name)} כבר קטף את כל הפרסים האישיים 🏆`}</div>`;
+}
+
+function viewHome(){
+  const t=total(), cid=curWho(), cur=person(cid);
+  const tt=ymd(db.meet), st=ymd(db.start);
+  const nextP=PRIZES.find(p=>p.n>t);
+  const prevN=([...PRIZES].reverse().find(p=>p.n<=t)||{n:0}).n;
+  const pct=nextP?Math.round((t-prevN)/(nextP.n-prevN)*100):100;
+  const members=db.people.map(p=>`<button class="who ${p.id===cid?'on':''}" data-who="${p.id}" aria-pressed="${p.id===cid}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}<small>${pTotal(p.id)} 💨</small></button>`).join('')
+    +`<button class="who add" data-act="addPerson"><span class="av">➕</span>הוספה</button>`;
+  const tiles=db.cats.map(c=>`<div class="tile" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
+      <span class="c">${cCount(cid,c.id)}</span>
+      <button class="edit" data-act="edit" data-cat="${c.id}" aria-label="קביעה ידנית">✏️</button>
+      <span class="e">${c.emoji}</span><div class="n">${esc(c.name)}</div>
+      <button class="star" data-act="detail" data-cat="${c.id}" aria-label="רישום מפורט">★</button></div>`).join('');
+  const dates=(tt||st)?`<div class="dates">
+      ${tt?`<div>💘 מאז ההיכרות<br><b>${dateText(tt)}</b></div>`:''}
+      ${st?`<div>🏠 ביחד מאז ${fmtDate(db.start)}<br><b>${st.days} ימים</b></div>`:''}
+    </div>`:`<div class="muted" style="margin-top:10px">הוסיפו תאריך היכרות והתחלה בהגדרות ⚙️</div>`;
+  const recent=db.log.slice(-3).reverse().map(entryHTML).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
+  return `
+  <section class="card counter">
+    <h1>כמה פלוצים שרדתם ביחד?</h1>
+    <p class="sub">עד שהריח יפריד בינינו</p>
+    <div class="bignum"><b id="total" data-v="${t}">${t}</b><span>פלוצים ששרדתם</span></div>
+    ${dates}
+  </section>
+  <section class="card">
+    <h2>🏆 הפרס הבא של הבית</h2>
+    <div class="muted">${nextP?`עוד <b>${nextP.n-t}</b> פלוצים עד ${nextP.icon} ${esc(nextP.name)}`:'סיימתם את כל הפרסים 💀 אתם הגרסה הכי מסוכנת של האהבה'}</div>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <div class="ms">${PRIZES.slice(0,8).map(p=>`<div class="${t>=p.n?'won':(nextP&&p.n===nextP.n?'next':'')}"><b>${p.n}</b>${p.icon} ${esc(p.name)}</div>`).join('')}</div>
+  </section>
+  <section class="card">
+    <h2>💨 מי הפליץ עכשיו?</h2>
+    <div class="hscroll">${members}</div>
+    ${cid!=='none'?personCard(cid):'<div class="muted">בחרו בן משפחה כדי לשייך את הפלוצים</div>'}
+    <input class="search" id="catSearch" type="search" placeholder="חיפוש סוג פלוץ (למשל: ירידה)" aria-label="חיפוש סוג פלוץ">
+    <div class="tiles">${tiles}</div>
+  </section>
+  <section class="card"><h2>🕘 האחרונים</h2>${recent}</section>`;
+}
+
+function entryHTML(e){
+  const c=catOf(e.cat), p=person(e.who);
+  const sign=e.delta<0?'':'+';
+  return `<div class="entry"><div class="emo">${c.emoji}</div><div style="flex:1">
+    <div class="t">${esc(c.name)} <span class="muted">${sign}${e.delta}</span></div>
+    <div class="m">${esc(p.name)} · ${fmtDate(e.ts)}${e.legend?' · 👑':''}${e.manual?' · 🔧':''}</div>
+    ${e.noise!=null?`<div class="s">${stars(Math.max(1,Math.round((e.noise+e.smell)/2)))}${e.story?' · '+esc(e.story):''}</div>`:''}
+  </div></div>`;
+}
+
+function viewLog(){
+  const items=db.log.slice().reverse().slice(0,120).map(e=>{
+    const c=catOf(e.cat), p=person(e.who), sign=e.delta<0?'':'+';
+    return `<div class="entry"><div class="emo">${c.emoji}</div><div style="flex:1">
+      <div class="t">${esc(c.name)} <span class="muted">${sign}${e.delta}</span></div>
+      <div class="m">${esc(p.name)} · ${fmtDate(e.ts)}${e.legend?' · 👑':''}${e.manual?' · 🔧':''}</div>
+      ${e.noise!=null?`<div class="s">${stars(Math.max(1,Math.round((e.noise+e.smell)/2)))}${e.story?' · '+esc(e.story):''}</div>`:''}
+    </div><button class="x" data-act="delEntry" data-id="${e.id}" aria-label="מחיקת רישום">✕</button></div>`;
+  }).join('');
+  const last=db.log[db.log.length-1];
+  return `<section class="card">
+    <div class="row" style="justify-content:space-between">
+      <h2 style="margin:0">📜 כל הפלוצים</h2>
+      <button class="ghost" data-act="undo" ${last?'':'disabled'}>↩️ ביטול אחרון</button>
+    </div>
+    <div style="margin-top:8px">${items||'<div class="muted">היומן ריק כרגע</div>'}</div>
+  </section>`;
+}
+
+function viewLegends(){
+  const list=db.log.filter(e=>e.legend).slice().reverse();
+  const items=list.map(e=>{
+    const p=person(e.who), c=catOf(e.cat), r=Math.max(1,Math.round(((e.noise||0)+(e.smell||0))/2));
+    return `<div class="entry"><div class="emo">🏅</div><div style="flex:1">
+      <div class="t">${c.emoji} ${esc(c.name)}</div>
+      <div class="m">${esc(p.name)} · ${fmtDate(e.ts)}</div>
+      <div class="s">${stars(r)}${e.story?' · '+esc(e.story):''}</div></div></div>`;
+  }).join('');
+  const cat=window.__cmpCat||'all', week=!!window.__cmpWeek;
+  const rows=standings(cat,week);
+  const max=Math.max(1,...rows.map(r=>r.n));
+  const leader=rows[0]&&rows[0].n>0?rows[0]:null;
+  const bars=rows.length?rows.map((r,i)=>`<div class="lbr"><span>${i===0&&leader?'<span class="crown">👑</span>':(i+1)}</span>
+      <div><div style="font-size:13px">${esc(avatar(r.p))} ${esc(r.p.name)}</div><div class="tr"><i data-w="${Math.round(r.n/max*100)}"></i></div></div>
+      <b>${r.n}</b></div>`).join(''):'<div class="muted">הוסיפו בני משפחה בהגדרות כדי להתחיל תחרות 🏁</div>';
+  const opts=[['all','כל הסוגים'],...db.cats.map(c=>[c.id,c.emoji+' '+c.name])].map(([v,l])=>`<option value="${v}" ${v===cat?'selected':''}>${esc(l)}</option>`).join('');
+  return `
+  <section class="card"><h2>🏁 תחרות בין בני המשפחה</h2>
+    <div class="row" style="margin-bottom:8px">
+      <button class="ghost ${!week?'on':''}" data-act="cmpWeek" data-v="0">מאז ומעולם</button>
+      <button class="ghost ${week?'on':''}" data-act="cmpWeek" data-v="1">השבוע</button>
+    </div>
+    <select id="cmpCat" class="search" style="margin-top:0" aria-label="סוג לתחרות">${opts}</select>
+    <div class="lb">${bars}</div>
+  </section>
+  <section class="card"><h2>👑 היכל הפלוצים האגדיים</h2>${items||'<div class="muted">עוד אין פלוצים אגדיים. מישהו צריך להתאמץ יותר 😤</div>'}</section>`;
+}
+
+function viewGame(){
+  const pads=PAD.map((p,i)=>`<button data-act="play" data-i="${i}"><span class="e">${p.e}</span>${p.l}</button>`).join('');
+  return `<section class="card"><h2>🎛️ לוח הפלוצים</h2>
+    <div class="muted">להשמעה בלבד. לא משנה את המונה.</div>
+    <div class="pad">${pads}<button data-act="random"><span class="e">🎲</span>הפתעה</button></div>
+    <button class="ghost" style="margin-top:12px;width:100%" data-act="stop">⏹ עצירה</button></section>`;
+}
+
+function viewSettings(){
+  const members=realPeople().map(p=>`<div class="entry" style="align-items:center">
+      <div class="emo">${esc(avatar(p))}</div>
+      <div style="flex:1"><div class="t">${esc(p.name)}</div><div class="m">${esc(relLabel(p))}${p.gender?' · '+esc(p.gender):''}</div></div>
+      <button class="ghost" data-act="editPerson" data-id="${p.id}">✏️</button>
+      <button class="danger" data-act="rmPerson" data-id="${p.id}" aria-label="הסרה">✕</button></div>`).join('')
+    ||'<div class="muted">עוד אין בני משפחה</div>';
+  const customs=db.cats.filter(c=>c.custom).map(c=>`<span class="chip">${c.emoji} ${esc(c.name)} <button data-act="rmCat" data-id="${c.id}" aria-label="הסרה">✕</button></span>`).join('')||'<span class="muted">אין סוגים אישיים עדיין</span>';
+  return `
+  <section class="card"><h2>📅 תאריכים ומספרים</h2>
+    <div class="field">תאריך ההיכרות 💘<input id="meetDate" type="date" value="${db.meet||''}"></div>
+    <div class="field">תאריך תחילת הזוגיות או הבית 🏠<input id="startDate" type="date" value="${db.start||''}"></div>
+    <div class="field">כמה פלוצים כבר נספרו לפני האפליקציה?<input id="baseline" type="number" min="0" max="99999" value="${db.base||0}">
+      <span class="muted" style="font-weight:400">המספר הקיים שלכם, למשל 155, ימשיך מכאן.</span></div>
+  </section>
+  <section class="card"><h2>👪 בני המשפחה והחיות</h2>${members}
+    <div class="row" style="margin-top:10px"><button class="primary sm" data-act="addPerson">+ הוספה</button></div>
+  </section>
+  <section class="card"><h2>🧩 סוגים אישיים</h2>
+    <div class="row" style="margin-bottom:8px">${customs}</div>
+    <div class="field"><input id="newCat" type="text" maxlength="30" placeholder="למשל: בחדר של הכלב"></div>
+    <button class="primary sm" data-act="addCat">הוספה ✨</button>
+  </section>
+  <section class="card"><h2>📤 שיתוף</h2>
+    <div class="muted">התחברות במייל או Google תגיע בהמשך. כרגע הנתונים נשמרים במכשיר הזה.</div>
+    <div class="row" style="margin-top:8px"><a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('כמה פלוצים שרדנו ביחד? 💨 '+location.href)}" target="_blank" rel="noopener">💬 שתפו בוואטסאפ</a></div>
+  </section>
+  <section class="card"><h2>🗂️ נתונים</h2>
+    <div class="row"><button class="ghost" data-act="export">ייצוא JSON</button><button class="danger" data-act="reset">איפוס הכל</button></div>
+  </section>`;
+}
+
+function render(){
+  const y=window.scrollY;
+  const v=$('view');
+  v.innerHTML=tab==='home'?viewHome():tab==='log'?viewLog():tab==='legends'?viewLegends():tab==='game'?viewGame():viewSettings();
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  const t=$('total'); if(t) countUp(t,total());
+  const s=$('catSearch'); if(s&&s.value) filterTiles(s.value);
+  document.querySelectorAll('.lbr .tr i').forEach(i=>requestAnimationFrame(()=>{ i.style.width=i.dataset.w+'%'; }));
+  window.scrollTo({top:y});
+}
+function filterTiles(q){
+  q=q.trim();
+  document.querySelectorAll('.tile').forEach(t=>{
+    const name=(catOf(t.dataset.tile).name||'');
+    t.style.display=(!q||name.includes(q))?'':'none';
+  });
+}
+
+/* ---------- actions ---------- */
+const newId=()=>'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+function addEntry(ev){
+  const before={t:total(),p:pTotal(ev.who)};
+  db.log.push(ev); save();
+  return {before,after:{t:total(),p:pTotal(ev.who)}};
+}
+function showAch(a){
+  $('achIcon').textContent=a.icon; $('achTitle').textContent=a.title;
+  $('achSub').textContent=a.sub; $('achIdeas').textContent=a.ideas;
+  $('achDlg').showModal();
+}
+function celebrate(before,after,pid,name){
+  const queue=[];
+  const hit=PRIZES.filter(p=>p.n>before.t&&p.n<=after.t).pop();
+  if(hit) queue.push({icon:hit.icon,title:hit.name,sub:`הגעתם ל־${hit.n} פלוצים!`,ideas:'רעיון לחגיגה: '+hit.ideas});
+  PERSON_PRIZES.filter(p=>p.n>before.p&&p.n<=after.p).forEach(p=>queue.push({icon:p.icon,title:p.name,sub:`${name} הגיע/ה ל־${p.n} פלוצים אישיים!`,ideas:'פרס אישי 🏆'}));
+  if(!queue.length) return;
+  setTimeout(()=>{
+    sfxDing(); confetti(['🏆','👑','✨','💗','🎉']);
+    showAch(queue.shift());
+    queue.forEach((q,i)=>setTimeout(()=>toast(`${q.icon} ${q.title}`,true),2500+i*1500));
+  },350);
+}
+$('achClose').onclick=()=>$('achDlg').close();
+
+function quickAdd(tileEl,cid){
+  const pid=curWho();
+  const {before,after}=addEntry({id:newId(),ts:Date.now(),who:pid,cat:cid,delta:1,legend:false});
+  const r=tileEl.getBoundingClientRect();
+  cloud(r.left+r.width/2,r.top+r.height/2);
+  floatText(r.left+r.width/2,r.top,'+1');
+  sfxFart(); buzz(25);
+  render();
+  toast(`נרשם 💨 ${after.t} ביחד`);
+  celebrate(before,after,pid,person(pid).name);
+}
+function manualEdit(cid){
+  const pid=curWho(), cur=cCount(pid,cid);
+  const v=prompt(`כמה פלוצים לקבוע ל${person(pid).name} בקטגוריה הזו?`,cur);
+  if(v===null) return;
+  const n=Math.floor(+v);
+  if(isNaN(n)||n<0){ toast('מספר בלבד בבקשה 🙃'); return; }
+  const d=n-cur; if(!d) return;
+  const {before,after}=addEntry({id:newId(),ts:Date.now(),who:pid,cat:cid,delta:d,legend:false,manual:true});
+  render(); toast(`עודכן ל־${n} 🔧`);
+  celebrate(before,after,pid,person(pid).name);
+}
+function undo(){
+  const last=db.log.pop(); if(!last) return;
+  save(); render(); toast('בוטל ↩️');
+}
+function deleteEntry(id){
+  const i=db.log.findIndex(e=>e.id===id); if(i<0) return;
+  db.log.splice(i,1); save(); render(); toast('הרישום נמחק 🗑️');
+}
+
+/* ---------- detailed form ---------- */
+let form={cat:null,who:null};
+function drawForm(){
+  $('fCats').innerHTML=db.cats.map(c=>`<button type="button" class="chip ${c.id===form.cat?'on':''}" data-fcat="${c.id}">${c.emoji} ${esc(c.name)}</button>`).join('');
+  $('fWho').innerHTML=db.people.map(p=>`<button type="button" class="chip ${p.id===form.who?'on':''}" data-fwho="${p.id}">${esc(avatar(p))} ${esc(p.name)}</button>`).join('');
+  sliders();
+}
+function sliders(){
+  const n=+$('noise').value, s=+$('smell').value;
+  $('noiseVal').textContent=n; $('smellVal').textContent=s;
+  $('noiseLbl').textContent=noiseNames[Math.min(4,Math.round(n*4/5))];
+  $('smellLbl').textContent=smellNames[Math.min(4,Math.round(s*4/5))];
+}
+$('noise').oninput=sliders; $('smell').oninput=sliders;
+$('fCats').onclick=e=>{ const b=e.target.closest('[data-fcat]'); if(b){ form.cat=b.dataset.fcat; drawForm(); } };
+$('fWho').onclick=e=>{ const b=e.target.closest('[data-fwho]'); if(b){ form.who=b.dataset.fwho; drawForm(); } };
+function openForm(cid){
+  form.cat=cid||db.cats[0].id; form.who=curWho();
+  $('err').textContent=''; drawForm(); $('dlg').showModal();
+}
+$('cancel').onclick=()=>$('dlg').close();
+$('save').onclick=()=>{
+  const story=$('story').value.trim(), legend=$('legend').checked;
+  if(legend&&!story){ $('err').textContent='פלוץ אגדי צריך סיפור קצר 📜'; return; }
+  const noise=+$('noise').value, smell=+$('smell').value;
+  const pid=form.who;
+  const {before,after}=addEntry({id:newId(),ts:Date.now(),who:pid,cat:form.cat,delta:1,legend,story,noise,smell});
+  who=pid;
+  $('dlg').close();
+  $('story').value=''; $('legend').checked=false; $('noise').value=2; $('smell').value=2;
+  sfxFart(); buzz(35); confetti(); render();
+  toast(`נרשם 💨 ${after.t} ביחד`);
+  if(legend) setTimeout(()=>toast('נכנס להיכל האגדי 👑',true),500);
+  celebrate(before,after,pid,person(pid).name);
+};
+
+/* ---------- member dialog ---------- */
+let mState=null;
+function drawMember(){
+  $('mGender').innerHTML=GENDERS.map(g=>`<button type="button" class="chip ${mState.gender===g?'on':''}" data-mg="${g}">${g}</button>`).join('');
+  $('mRel').innerHTML=REL.map(r=>`<button type="button" class="chip ${mState.rel===r.k?'on':''}" data-mr="${r.k}">${r.e} ${r.l}</button>`).join('');
+  $('mCustomWrap').hidden=mState.rel!=='custom';
+  $('mEmoji').innerHTML=EMOJIS.map(e=>`<button type="button" class="chip ${mState.emoji===e?'on':''}" data-me="${e}">${e}</button>`).join('');
+}
+function openMember(id){
+  const p=id?db.people.find(x=>x.id===id):null;
+  mState=p?{...p}:{id:null,name:'',gender:'נקבה',rel:'partnerF',emoji:'',relName:''};
+  $('mTitle').textContent=p?'✏️ עריכת בן משפחה':'👋 הוספת בן משפחה';
+  $('mName').value=mState.name||''; $('mCustom').value=mState.relName||''; $('mErr').textContent='';
+  drawMember(); $('mDlg').showModal();
+}
+$('mGender').onclick=e=>{ const b=e.target.closest('[data-mg]'); if(b){ mState.gender=b.dataset.mg; drawMember(); } };
+$('mRel').onclick=e=>{ const b=e.target.closest('[data-mr]'); if(b){ mState.rel=b.dataset.mr; drawMember(); } };
+$('mEmoji').onclick=e=>{ const b=e.target.closest('[data-me]'); if(b){ mState.emoji=b.dataset.me; drawMember(); } };
+$('mCancel').onclick=()=>$('mDlg').close();
+$('mSave').onclick=()=>{
+  const fail=m=>{ $('mErr').textContent=m; };
+  const name=$('mName').value.trim();
+  if(!name) return fail('צריך שם 🙂');
+  if(db.people.some(p=>p.name===name&&p.id!==mState.id)) return fail('השם הזה כבר קיים');
+  const relName=$('mCustom').value.trim();
+  if(mState.rel==='custom'&&!relName) return fail('כתבו את הסטטוס המותאם');
+  const data={name,gender:mState.gender,rel:mState.rel,relName:mState.rel==='custom'?relName:'',emoji:mState.emoji||''};
+  if(mState.id){ Object.assign(db.people.find(p=>p.id===mState.id),data); }
+  else { const np={id:'p'+Date.now(),...data}; db.people.push(np); who=np.id; }
+  save(); $('mDlg').close(); render();
+  sfxDing(); confetti(['🎉','💗','🐾','👋']);
+  toast(`${name} הצטרף/ה 👋`);
+};
+
+/* ---------- events ---------- */
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{ tab=b.dataset.tab; render(); window.scrollTo({top:0}); });
+$('gearBtn').onclick=()=>{ tab='settings'; render(); window.scrollTo({top:0}); };
+$('muteBtn').textContent=db.muted?'🔇':'🔊';
+$('muteBtn').onclick=()=>{ db.muted=!db.muted; save(); $('muteBtn').textContent=db.muted?'🔇':'🔊'; if(db.muted) stopSound(); };
+
+document.addEventListener('click',e=>{
+  const wb=e.target.closest('[data-who]');
+  if(wb&&!e.target.closest('[data-act]')){ who=wb.dataset.who; render(); return; }
+  const btn=e.target.closest('[data-act]');
+  if(btn){
+    const act=btn.dataset.act, cid=btn.dataset.cat, id=btn.dataset.id;
+    if(act==='edit') return manualEdit(cid);
+    if(act==='detail') return openForm(cid);
+    if(act==='undo') return undo();
+    if(act==='delEntry') return deleteEntry(id);
+    if(act==='addPerson') return openMember();
+    if(act==='editPerson') return openMember(id);
+    if(act==='rmPerson'){
+      if(!confirm('להסיר את האדם הזה מהרשימה? הפלוצים שנרשמו יישארו ביומן.')) return;
+      db.people=db.people.filter(p=>p.id!==id); save(); render(); return;
+    }
+    if(act==='addCat'){
+      const v=($('newCat')||{value:''}).value.trim(); if(!v) return;
+      db.cats.push({id:'u'+Date.now(),name:v,emoji:'✨',custom:true}); save(); render(); toast('סוג חדש נוסף ✨'); return;
+    }
+    if(act==='rmCat'){ db.cats=db.cats.filter(c=>c.id!==id); save(); render(); return; }
+    if(act==='play'){ playPreset(PAD[+btn.dataset.i]); return; }
+    if(act==='random'){ playRandom(); return; }
+    if(act==='stop'){ stopSound(); return; }
+    if(act==='cmpWeek'){ window.__cmpWeek=btn.dataset.v==='1'; render(); return; }
+    if(act==='export'){
+      const blob=new Blob([JSON.stringify(db,null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ahava-veplutzim.json'; a.click(); return;
+    }
+    if(act==='reset'){
+      if(!confirm('בטוחים? זה ימחק הכל.')) return;
+      db=blank(); save(); who=null; render(); toast('הכל התחיל מחדש 🌱'); return;
+    }
+    return;
+  }
+  const tile=e.target.closest('.tile');
+  if(tile) quickAdd(tile,tile.dataset.tile);
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tile')) quickAdd(e.target,e.target.dataset.tile);
+});
+document.addEventListener('input',e=>{ if(e.target.id==='catSearch') filterTiles(e.target.value); });
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='meetDate'){ db.meet=t.value; save(); toast('עודכן 💘'); render(); }
+  if(t.id==='startDate'){ db.start=t.value; save(); toast('עודכן 🏠'); render(); }
+  if(t.id==='baseline'){ db.base=Math.max(0,+t.value||0); save(); toast('עודכן ✔️'); render(); }
+  if(t.id==='cmpCat'){ window.__cmpCat=t.value; render(); }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

@@ -32,6 +32,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .view-in{animation:viewIn .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+.pick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.pick{background:#fff;border:2px solid var(--soft);border-radius:18px;padding:14px 8px;font-weight:800;color:var(--plum);display:flex;flex-direction:column;align-items:center;gap:4px;box-shadow:var(--shadow);transition:transform .12s;min-width:0}
+.pick .av{font-size:32px;line-height:1}
+.pick:active{transform:scale(.95)}
+.pick:hover{border-color:var(--pink)}
 .wrap{max-width:480px;margin:0 auto;padding:14px 14px 24px}
 .top{display:flex;justify-content:space-between;align-items:center}
 .brand{font-weight:900;font-size:21px;color:var(--plum)}
@@ -240,6 +245,13 @@ textarea,.sheet input[type=text]{width:100%;border:2px solid var(--soft);border-
   <div class="label">או הצטרפו עם קוד</div>
   <div class="row"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
   <button class="ghost" style="margin-top:12px;width:100%" data-room="later">אחר כך, אשחק לבד</button>
+</div></dialog>
+
+<dialog id="whoDlg" aria-labelledby="whoTitle"><div class="sheet">
+  <h3 id="whoTitle">מי הפליץ?</h3>
+  <div class="muted">בחרו מי עשה את הפלוץ, והוא יירשם על שמו.</div>
+  <div class="pick-grid" id="whoList"></div>
+  <button class="ghost" type="button" style="margin-top:12px;width:100%" data-pick-cancel="1">ביטול</button>
 </div></dialog>
 
 <div id="toasts" aria-live="polite"></div>
@@ -706,8 +718,19 @@ function celebrate(before,after,pid,name){
 }
 $('achClose').onclick=()=>$('achDlg').close();
 
-function quickAdd(tileEl,cid){
-  const pid=curWho();
+let pickTile=null, pickCat=null;
+function openWhoPick(tileEl,cid){
+  const ppl=realPeople();
+  if(!ppl.length){ quickAdd(tileEl,cid); return; }
+  const c=catOf(cid);
+  pickTile=tileEl; pickCat=cid;
+  $('whoTitle').textContent=`${c.emoji} ${c.name}: מי הפליץ?`;
+  $('whoList').innerHTML=ppl.map(p=>`<button class="pick" type="button" data-pick="${p.id}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}</button>`).join('');
+  $('whoDlg').showModal();
+}
+function quickAdd(tileEl,cid,chosen){
+  const pid=chosen||curWho();
+  if(chosen){ who=chosen; }
   const {before,after}=addEntry({id:newId(),ts:Date.now(),who:pid,cat:cid,delta:1,legend:false});
   const r=tileEl.getBoundingClientRect();
   cloud(r.left+r.width/2,r.top+r.height/2);
@@ -852,11 +875,18 @@ document.addEventListener('click',e=>{
     }
     return;
   }
+  const pk=e.target.closest('[data-pick]');
+  if(pk){
+    $('whoDlg').close();
+    if(pickTile&&pickTile.isConnected) quickAdd(pickTile,pickCat,pk.dataset.pick);
+    return;
+  }
+  if(e.target.closest('[data-pick-cancel]')){ $('whoDlg').close(); return; }
   const tile=e.target.closest('.tile');
-  if(tile) quickAdd(tile,tile.dataset.tile);
+  if(tile) openWhoPick(tile,tile.dataset.tile);
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tile')) quickAdd(e.target,e.target.dataset.tile);
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('tile')) openWhoPick(e.target,e.target.dataset.tile);
 });
 document.addEventListener('input',e=>{ if(e.target.id==='catSearch') filterTiles(e.target.value); });
 document.addEventListener('change',e=>{

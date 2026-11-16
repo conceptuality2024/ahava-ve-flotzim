@@ -32,6 +32,9 @@ button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px soli
 .view-in{animation:viewIn .35s cubic-bezier(.2,.8,.2,1)}
 @keyframes viewIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .hint{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.5}
+.rc{flex:0 0 auto;background:var(--soft);border-radius:16px;padding:8px 12px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:13px;color:var(--plum);min-width:104px}
+.rc .re{font-size:22px;line-height:1.1}
+.rc small{color:var(--muted);font-size:11px}
 .dcta{display:block;width:100%;margin:0 0 12px;padding:14px 16px;border-radius:18px;background:linear-gradient(135deg,var(--gold),#ff9b3d);color:#4a2e00;font-weight:900;font-size:16px;box-shadow:0 8px 20px rgba(247,183,51,.45);animation:pulse 1.8s ease-in-out infinite;transition:transform .15s}
 .dcta:active{transform:scale(.96)}
 .dcta.soft{background:#fff;color:var(--plum);border:2px dashed var(--pink);box-shadow:none;animation:none;font-size:15px;padding:11px 14px}
@@ -600,7 +603,7 @@ function viewHome(){
     </div>`:'';
   const ctas=(!tt?`<button class="dcta" data-act="goSettings" data-focus="meetDate">💘 הוסיפו תאריך היכרות ותתחילו לספור ימים</button>`:'')
     +(tt&&!st?`<button class="dcta soft" data-act="goSettings" data-focus="startDate">🏠 הוסיפו תאריך תחילת הבית</button>`:'');
-  const recent=db.log.slice(-3).reverse().map(entryHTML).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
+  const recent=db.log.slice(-5).reverse().map(e=>`<div class="rc"><span class="re">${catOf(e.cat).emoji}</span><b>${esc(person(e.who).name)}</b><small>${timeAgo(e.ts)}</small></div>`).join('')||'<div class="muted">עוד אין פלוצים. לחצו על אריח למטה ותתחילו לספור 👇</div>';
   return `
   <section class="card counter">${ctas}
     <h1>כמה פלוצים שרדתם ביחד?</h1>
@@ -614,19 +617,26 @@ function viewHome(){
     <div class="bar"><i style="width:${pct}%"></i></div>
     <div class="ms">${PRIZES.slice(0,8).map(p=>`<div class="${t>=p.n?'won':(nextP&&p.n===nextP.n?'next':'')}"><b>${p.n}</b>${p.icon} ${esc(p.name)}</div>`).join('')}</div>
   </section>
+  <section class="card"><h2>🕘 האחרונים</h2><div class="hscroll rl">${recent}</div></section>
   <section class="card">
     <h2>💨 מי הפליץ עכשיו?</h2>
     <div class="hscroll">${members}</div>
     ${cid!=='none'?personCard(cid):'<div class="muted">בחרו בן משפחה כדי לשייך את הפלוצים</div>'}
-  </section>
-  <section class="card"><h2>🕘 האחרונים</h2>${recent}</section>
-  <section class="card">
+
     <input class="search" id="catSearch" type="search" placeholder="חיפוש סוג פלוץ (למשל: ירידה)" aria-label="חיפוש סוג פלוץ">
     <div class="tiles">${tiles}</div>
   </section>
   `;
 }
 
+function timeAgo(ts){
+  const m=Math.max(0,Math.round((Date.now()-ts)/60000));
+  if(m<1) return 'עכשיו';
+  if(m<60) return `לפני ${m} דקות`;
+  const h=Math.round(m/60);
+  if(h<24) return `לפני ${h} שעות`;
+  return `לפני ${Math.round(h/24)} ימים`;
+}
 function entryHTML(e){
   const c=catOf(e.cat), p=person(e.who);
   const sign=e.delta<0?'':'+';

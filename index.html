@@ -486,10 +486,10 @@ function viewHome(){
   const prevN=([...PRIZES].reverse().find(p=>p.n<=t)||{n:0}).n;
   const pct=nextP?Math.round((t-prevN)/(nextP.n-prevN)*100):100;
   const members=db.people.map(p=>`<button class="who ${p.id===cid?'on':''}" data-who="${p.id}" aria-pressed="${p.id===cid}"><span class="av">${esc(avatar(p))}</span>${esc(p.name)}<small>${pTotal(p.id)} 💨</small></button>`).join('')
-    +`<button class="who add" data-act="addPerson"><span class="av">➕</span>הוספה</button>`;
+    +(canEdit()?`<button class="who add" data-act="addPerson"><span class="av">➕</span>הוספה</button>`:'');
   const tiles=db.cats.map(c=>`<div class="tile" data-tile="${c.id}" tabindex="0" role="button" aria-label="${esc(c.name)}">
       <span class="c">${cCount(cid,c.id)}</span>
-      <button class="edit" data-act="edit" data-cat="${c.id}" aria-label="קביעה ידנית">✏️</button>
+      ${canEdit()?`<button class="edit" data-act="edit" data-cat="${c.id}" aria-label="קביעה ידנית">✏️</button>`:''}
       <span class="e">${c.emoji}</span><div class="n">${esc(c.name)}</div>
       <button class="star" data-act="detail" data-cat="${c.id}" aria-label="רישום מפורט">★</button></div>`).join('');
   const dates=(tt||st)?`<div class="dates">
@@ -537,13 +537,13 @@ function viewLog(){
       <div class="t">${esc(c.name)} <span class="muted">${sign}${e.delta}</span></div>
       <div class="m">${esc(p.name)} · ${fmtDate(e.ts)}${e.legend?' · 👑':''}${e.manual?' · 🔧':''}</div>
       ${e.noise!=null?`<div class="s">${stars(Math.max(1,Math.round((e.noise+e.smell)/2)))}${e.story?' · '+esc(e.story):''}</div>`:''}
-    </div><button class="x" data-act="delEntry" data-id="${e.id}" aria-label="מחיקת רישום">✕</button></div>`;
+    </div>${canEdit()?`<button class="x" data-act="delEntry" data-id="${e.id}" aria-label="מחיקת רישום">✕</button>`:''}</div>`;
   }).join('');
   const last=db.log[db.log.length-1];
   return `<section class="card">
     <div class="row" style="justify-content:space-between">
       <h2 style="margin:0">📜 כל הפלוצים</h2>
-      <button class="ghost" data-act="undo" ${last?'':'disabled'}>↩️ ביטול אחרון</button>
+      ${canEdit()?`<button class="ghost" data-act="undo" ${last?'':'disabled'}>↩️ ביטול אחרון</button>`:''}
     </div>
     <div style="margin-top:8px">${items||'<div class="muted">היומן ריק כרגע</div>'}</div>
   </section>`;
@@ -587,6 +587,11 @@ function viewGame(){
 }
 
 function viewSettings(){
+  if(canEdit()) return viewSettingsFull();
+  return `${roomSection()}
+  <section class="card"><h2>🗂️ נתונים</h2><div class="row"><button class="ghost" data-act="export">ייצוא JSON</button></div></section>`;
+}
+function viewSettingsFull(){
   const members=realPeople().map(p=>`<div class="entry" style="align-items:center">
       <div class="emo">${esc(avatar(p))}</div>
       <div style="flex:1"><div class="t">${esc(p.name)}</div><div class="m">${esc(relLabel(p))}${p.gender?' · '+esc(p.gender):''}</div></div>
@@ -641,7 +646,7 @@ function filterTiles(q){
 const newId=()=>'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 function addEntry(ev){
   const before={t:total(),p:pTotal(ev.who)};
-  db.log.push(ev); save();
+  db.log.push(ev); saveLocal(); sendEntry(ev);
   return {before,after:{t:total(),p:pTotal(ev.who)}};
 }
 function showAch(a){
@@ -687,11 +692,11 @@ function manualEdit(cid){
 }
 function undo(){
   const last=db.log.pop(); if(!last) return;
-  save(); render(); toast('בוטל ↩️');
+  save(); pushLog(); render(); toast('בוטל ↩️');
 }
 function deleteEntry(id){
   const i=db.log.findIndex(e=>e.id===id); if(i<0) return;
-  db.log.splice(i,1); save(); render(); toast('הרישום נמחק 🗑️');
+  db.log.splice(i,1); save(); pushLog(); render(); toast('הרישום נמחק 🗑️');
 }
 
 /* ---------- detailed form ---------- */
@@ -801,7 +806,7 @@ document.addEventListener('click',e=>{
     }
     if(act==='reset'){
       if(!confirm('בטוחים? זה ימחק הכל.')) return;
-      db=blank(); save(); who=null; render(); toast('הכל התחיל מחדש 🌱'); return;
+      db=blank(); save(); pushLog(); who=null; render(); toast('הכל התחיל מחדש 🌱'); return;
     }
     return;
   }
@@ -823,10 +828,17 @@ document.addEventListener('change',e=>{
 /* ---------- family room (shared via Supabase) ---------- */
 const SB_URL='https://aygccuicmoyvxoxlcsvk.supabase.co';
 const SB_KEY='sb_publishable_CI5dy5mz41CQcyrq540XSw_SCzstuc3';
-const ROOM_KEY='ahava-room-code', ASKED_KEY='ahava-room-asked';
+const ROOM_KEY='ahava-room-code', ADMIN_KEY='ahava-room-admin', ASKED_KEY='ahava-room-asked';
 const CODE_CHARS='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-let room=null; try{ room=localStorage.getItem(ROOM_KEY)||null; }catch(e){}
+let room=null, adminTok=null;
+try{
+  room=localStorage.getItem(ROOM_KEY)||null;
+  const a=JSON.parse(localStorage.getItem(ADMIN_KEY)||'null');
+  if(a&&a.code===room) adminTok=a.token;
+}catch(e){}
 let lastStamp=null, pushTimer=null, pushing=false, dirty=false, pollTimer=null;
+let outbox=[], flushing=false, warnedOffline=false;
+const canEdit=()=>!room||!!adminTok;
 
 async function rpc(name,body){
   const r=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:{apikey:SB_KEY,Authorization:'Bearer '+SB_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -848,16 +860,29 @@ function newCode(){
   let s=''; for(const x of a) s+=CODE_CHARS[x%CODE_CHARS.length];
   return s;
 }
+function newToken(){
+  const a=new Uint8Array(16); crypto.getRandomValues(a);
+  return Array.from(a,x=>x.toString(16).padStart(2,'0')).join('');
+}
+function setRoom(code,token){
+  room=code; adminTok=token||null;
+  try{
+    localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1');
+    if(adminTok) localStorage.setItem(ADMIN_KEY,JSON.stringify({code,token:adminTok}));
+    else localStorage.removeItem(ADMIN_KEY);
+  }catch(e){}
+}
+
+/* setup changes (people, categories, dates, baseline): creator only, the log stays on the server */
 function queuePush(){
-  if(!room) return;
+  if(!room||!adminTok) return;
   dirty=true; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,400);
 }
-let warnedOffline=false;
 async function pushNow(){
-  if(!room||!dirty||pushing) return;
+  if(!room||!adminTok||!dirty||pushing) return;
   pushing=true; dirty=false;
   try{
-    const ok=await rpc('room_save',{p_code:room,p_state:db});
+    const ok=await rpc('room_save',{p_code:room,p_admin:adminTok,p_state:db});
     if(ok){ lastStamp=null; warnedOffline=false; }
   }catch(e){
     dirty=true;
@@ -866,14 +891,40 @@ async function pushNow(){
   pushing=false;
   if(dirty) pushTimer=setTimeout(pushNow,2000);
 }
+/* undo, delete and reset: creator only */
+async function pushLog(){
+  if(!room||!adminTok) return;
+  try{ await rpc('room_set_log',{p_code:room,p_admin:adminTok,p_log:db.log}); lastStamp=null; }
+  catch(e){ toast('לא הצלחנו לעדכן את היומן במשחק ⚠️'); }
+}
+/* plays: anyone in the room */
+function sendEntry(ev){
+  if(!room) return;
+  outbox.push(ev); flushOutbox();
+}
+async function flushOutbox(){
+  if(flushing||!room) return;
+  flushing=true;
+  while(outbox.length&&room){
+    try{
+      await rpc('room_add_entry',{p_code:room,p_entry:outbox[0]});
+      outbox.shift(); lastStamp=null; warnedOffline=false;
+    }catch(e){
+      if(!warnedOffline){ toast('אין חיבור כרגע, הרישום יישמר כשיחזור ⏳'); warnedOffline=true; }
+      flushing=false; setTimeout(flushOutbox,4000); return;
+    }
+  }
+  flushing=false;
+}
+
 async function poll(){
-  if(!room||dirty||pushing||document.hidden) return;
+  if(!room||dirty||pushing||outbox.length||document.hidden) return;
   const a=document.activeElement;
   if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA')) return;
   try{
     const rows=await rpc('room_get',{p_code:room});
     const row=rows&&rows[0];
-    if(!row||row.updated_at===lastStamp||dirty||pushing) return;
+    if(!row||row.updated_at===lastStamp||dirty||pushing||outbox.length) return;
     const local=normalize(row.state);
     lastStamp=row.updated_at;
     if(local){ db=local; saveLocal(); render(); }
@@ -890,7 +941,7 @@ async function joinRoom(raw,silent){
     if(!row){ if(!silent) toast('לא מצאנו משחק עם הקוד הזה 🔍'); return false; }
     const local=normalize(row.state);
     if(!local){ if(!silent) toast('המשחק הזה לא תקין 😵'); return false; }
-    room=code; try{ localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1'); }catch(e){}
+    setRoom(code, room===code ? adminTok : null);
     db=local; lastStamp=row.updated_at; dirty=false; saveLocal();
     startPoll(); render();
     if(!silent) toast('הצטרפתם למשחק 🎉');
@@ -903,12 +954,11 @@ async function joinRoom(raw,silent){
 async function createRoom(){
   try{
     for(let i=0;i<5;i++){
-      const code=newCode();
-      const ok=await rpc('room_create',{p_code:code,p_state:db});
+      const code=newCode(), token=newToken();
+      const ok=await rpc('room_create',{p_code:code,p_state:db,p_admin:token});
       if(ok){
-        room=code; try{ localStorage.setItem(ROOM_KEY,code); localStorage.setItem(ASKED_KEY,'1'); }catch(e){}
-        lastStamp=null; startPoll(); render();
-        toast('המשחק נוצר 🎉');
+        setRoom(code,token); lastStamp=null;
+        startPoll(); render(); toast('המשחק נוצר 🎉');
         return true;
       }
     }
@@ -918,24 +968,25 @@ async function createRoom(){
 }
 function leaveRoom(){
   if(!confirm('לצאת מהמשחק המשותף? הנתונים יישארו במכשיר הזה ובמשחק עצמו.')) return;
-  room=null; try{ localStorage.removeItem(ROOM_KEY); }catch(e){}
+  room=null; adminTok=null; outbox=[];
+  try{ localStorage.removeItem(ROOM_KEY); localStorage.removeItem(ADMIN_KEY); }catch(e){}
   clearInterval(pollTimer); render(); toast('יצאתם מהמשחק');
 }
 function roomLink(){ return location.origin+location.pathname+'?room='+room; }
 function roomSection(){
-  if(room){
-    return `<section class="card"><h2>👨‍👩‍👧 המשחק המשותף</h2>
-      <div class="muted">כל מי שיש לו את הקוד יכול לרשום פלוצים ולראות את המשחק.</div>
-      <div style="font-size:24px;letter-spacing:4px;text-align:center;font-weight:900;color:var(--plum);margin:10px 0">${esc(room)}</div>
-      <div class="row"><button class="primary sm" data-room="copy">📋 העתקת קישור</button>
-      <a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('בואו לספור פלוצים ביחד 💨 '+roomLink())}" target="_blank" rel="noopener">💬 שליחה בוואטסאפ</a></div>
-      <div class="row" style="margin-top:10px"><button class="danger" data-room="leave">יציאה מהמשחק</button></div>
+  if(!room){
+    return `<section class="card"><h2>👨‍👩‍👧 משחק משפחתי</h2>
+      <div class="muted">צרו משחק משותף כדי שכולם ירשמו פלוצים מהטלפון שלהם.</div>
+      <div class="row" style="margin-top:8px"><button class="primary sm" data-room="create">צרו משחק חדש</button></div>
+      <div class="row" style="margin-top:10px"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
     </section>`;
   }
-  return `<section class="card"><h2>👨‍👩‍👧 משחק משפחתי</h2>
-    <div class="muted">צרו משחק משותף כדי שכולם ירשמו פלוצים מהטלפון שלהם.</div>
-    <div class="row" style="margin-top:8px"><button class="primary sm" data-room="create">צרו משחק חדש</button></div>
-    <div class="row" style="margin-top:10px"><input id="joinCode" type="text" maxlength="12" placeholder="קוד משחק" style="flex:1;min-width:0;border:2px solid var(--soft);border-radius:14px;padding:10px 12px;font-size:15px;background:#fff"><button class="primary sm" data-room="join">הצטרפו</button></div>
+  return `<section class="card"><h2>👨‍👩‍👧 המשחק המשותף</h2>
+    <div class="muted">${adminTok?'אתם מנהלים את המשחק. רק אתם משנים הגדרות, ושאר בני המשפחה רושמים פלוצים.':'אתם משחקים ביחד. רק מי שיצר את המשחק משנה את ההגדרות.'}</div>
+    <div style="font-size:24px;letter-spacing:4px;text-align:center;font-weight:900;color:var(--plum);margin:10px 0">${esc(room)}</div>
+    <div class="row"><button class="primary sm" data-room="copy">📋 העתקת קישור</button>
+    <a class="ghost" style="text-decoration:none" href="https://wa.me/?text=${encodeURIComponent('בואו לספור פלוצים ביחד 💨 '+roomLink())}" target="_blank" rel="noopener">💬 שליחה בוואטסאפ</a></div>
+    <div class="row" style="margin-top:10px"><button class="danger" data-room="leave">יציאה מהמשחק</button></div>
   </section>`;
 }
 document.addEventListener('click',async e=>{
